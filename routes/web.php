@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CategoryController;
@@ -30,6 +31,10 @@ Route::middleware(['auth', 'admin'])
         Route::view('/dashboard', 'admin.dashboard')
             ->name('dashboard');
 
-        Route::resource('categories', CategoryController::class);
+        Route::resource('categories', CategoryController::class)
+            ->except(['show']);
+
+        Route::resource('posts', PostController::class)
+            ->except(['show']);
 });
 require __DIR__.'/auth.php';

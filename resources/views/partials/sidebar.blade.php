@@ -16,8 +16,10 @@
             Categories
         </a>
 
-        <a href="#"
-           class="block px-6 py-3 hover:bg-slate-800">
+        <a
+            href="{{ route('admin.posts.index') }}"
+            class="block px-6 py-3 transition hover:bg-slate-800"
+        >
             Posts
         </a>
 
