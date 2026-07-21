@@ -17,6 +17,24 @@
         @csrf
         @method('patch')
 
+        @if ($user->avatar)
+            <div class="flex items-center gap-4">
+                <img
+                    src="{{ $user->avatar }}"
+                    alt="{{ $user->name }}"
+                    class="h-16 w-16 rounded-full object-cover"
+                >
+                <div>
+                    <p class="text-sm font-medium text-gray-900">
+                        {{ __('Google avatar') }}
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        {{ __('This avatar is provided by your Google account.') }}
+                    </p>
+                </div>
+            </div>
+        @endif
+
         <div>
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />

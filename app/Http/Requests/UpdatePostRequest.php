@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Post;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -35,9 +34,6 @@ class UpdatePostRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var Post|null $post */
-        $post = $this->route('post');
-
         return [
             'category_id' => [
                 'required',
@@ -55,8 +51,6 @@ class UpdatePostRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('posts', 'slug')
-                    ->ignore($post),
             ],
 
             'summary' => [
@@ -113,9 +107,6 @@ class UpdatePostRequest extends FormRequest
 
             'slug.required' =>
                 'Không thể tạo đường dẫn cho bài viết.',
-
-            'slug.unique' =>
-                'Đường dẫn của bài viết này đã tồn tại.',
 
             'slug.max' =>
                 'Đường dẫn không được vượt quá 255 ký tự.',

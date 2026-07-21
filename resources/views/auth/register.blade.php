@@ -1,4 +1,17 @@
 <x-guest-layout>
+    <a
+        href="{{ route('google.redirect') }}"
+        class="mb-6 flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+    >
+        Register with Google
+    </a>
+
+    <div class="mb-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-gray-200"></div>
+        <span class="text-xs uppercase text-gray-400">or create account with email</span>
+        <div class="h-px flex-1 bg-gray-200"></div>
+    </div>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

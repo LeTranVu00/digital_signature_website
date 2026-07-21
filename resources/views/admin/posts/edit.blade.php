@@ -126,9 +126,9 @@
                             id="content"
                             name="content"
                             rows="16"
-                            class="block w-full rounded-lg border p-3 text-sm
+                            class="tinymce-editor block w-full rounded-lg border p-3 text-sm
                                    {{ $errors->has('content')
-                                        ? 'border-red-500 bg-red-50'
+                                         ? 'border-red-500 bg-red-50'
                                         : 'border-gray-300 bg-gray-50' }}
                                    focus:border-blue-500 focus:ring-blue-500"
                             placeholder="Nhập nội dung bài viết"

@@ -51,7 +51,6 @@ class StorePostRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('posts', 'slug'),
             ],
 
             'summary' => [
@@ -108,9 +107,6 @@ class StorePostRequest extends FormRequest
 
             'slug.required' =>
                 'Không thể tạo đường dẫn cho bài viết.',
-
-            'slug.unique' =>
-                'Đường dẫn của bài viết này đã tồn tại.',
 
             'slug.max' =>
                 'Đường dẫn không được vượt quá 255 ký tự.',
