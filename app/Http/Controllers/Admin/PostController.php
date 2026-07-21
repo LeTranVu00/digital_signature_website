@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
@@ -88,11 +89,63 @@ class PostController extends Controller
      * Sẽ hoàn thiện sau khi viết UpdatePostRequest.
      */
     public function update(
-        UpdatePostRequest $request,
-        Post $post
+    UpdatePostRequest $request,
+    Post $post
     ): RedirectResponse {
+        $data = $request->validated();
+
+        /*
+        * Quản lý thời gian xuất bản.
+        */
+        if ($data['status'] === 'published') {
+            /*
+            * Bài chưa từng xuất bản:
+            * gán thời gian hiện tại.
+            *
+            * Bài đã xuất bản:
+            * giữ nguyên ngày xuất bản cũ.
+            */
+            $data['published_at'] = $post->published_at ?? now();
+        } else {
+            /*
+            * Chuyển về bản nháp.
+            */
+            $data['published_at'] = null;
+        }
+
+        /*
+        * Ghi nhớ thumbnail cũ trước khi cập nhật.
+        */
+        $oldThumbnail = $post->thumbnail;
+
+        /*
+        * Nếu Admin chọn ảnh mới thì lưu ảnh mới.
+        */
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request
+                ->file('thumbnail')
+                ->store('posts', 'public');
+        }
+
+        /*
+        * Cập nhật dữ liệu bài viết.
+        */
+        $post->update($data);
+
+        /*
+        * Chỉ xóa ảnh cũ sau khi bài viết đã cập nhật thành công.
+        */
+        if (
+            $request->hasFile('thumbnail') &&
+            $oldThumbnail &&
+            Storage::disk('public')->exists($oldThumbnail)
+        ) {
+            Storage::disk('public')->delete($oldThumbnail);
+        }
+
         return redirect()
-            ->route('admin.posts.index');
+            ->route('admin.posts.index')
+            ->with('success', 'Cập nhật bài viết thành công.');
     }
 
     /**
@@ -100,9 +153,18 @@ class PostController extends Controller
      *
      * Sẽ bổ sung xử lý thumbnail ở bài sau.
      */
+    /**
+     * Chuyển bài viết vào thùng rác.
+     */
     public function destroy(Post $post): RedirectResponse
     {
+        $post->delete();
+
         return redirect()
-            ->route('admin.posts.index');
+            ->route('admin.posts.index')
+            ->with(
+                'success',
+                'Đã chuyển bài viết vào thùng rác.'
+            );
     }
 }

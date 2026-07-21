@@ -2,7 +2,10 @@
 
 @section('title', 'Quản lý bài viết')
 @if (session('success'))
-    <div class="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+    <div
+        class="mb-6 rounded-lg border border-green-200
+               bg-green-50 p-4 text-sm text-green-800"
+    >
         {{ session('success') }}
     </div>
 @endif
@@ -89,19 +92,24 @@
                                     <form
                                         action="{{ route('admin.posts.destroy', $post) }}"
                                         method="POST"
-                                    >
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button
-                                            type="submit"
-                                            class="rounded-lg bg-red-600 px-3 py-2
-                                                   text-xs font-medium text-white
-                                                   hover:bg-red-700"
+                                        onsubmit="
+                                            return confirm(
+                                                'Bạn chắc chắn muốn chuyển bài viết này vào thùng rác?'
+                                            )
+                                        "
                                         >
-                                            Xóa
-                                        </button>
-                                    </form>
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="rounded-lg bg-red-600 px-3 py-2
+                                                    text-xs font-medium text-white
+                                                    hover:bg-red-700"
+                                            >
+                                                Xóa
+                                            </button>
+                                        </form>
                                 </div>
                             </td>
                         </tr>
