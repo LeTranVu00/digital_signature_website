@@ -44,8 +44,27 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request): RedirectResponse
     {
+        $data = $request->validated();
+
+        $data['user_id'] = $request->user()->id;
+        $data['views'] = 0;
+
+        $data['published_at'] =
+            $data['status'] === 'published'
+                ? now()
+                : null;
+
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request
+                ->file('thumbnail')
+                ->store('posts', 'public');
+        }
+
+        Post::create($data);
+
         return redirect()
-            ->route('admin.posts.index');
+            ->route('admin.posts.index')
+            ->with('success', 'Thêm bài viết thành công.');
     }
 
     /**

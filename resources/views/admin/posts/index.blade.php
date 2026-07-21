@@ -1,7 +1,11 @@
 @extends('layouts.admin')
 
 @section('title', 'Quản lý bài viết')
-
+@if (session('success'))
+    <div class="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+        {{ session('success') }}
+    </div>
+@endif
 @section('content')
     <div class="mb-6 flex items-center justify-between">
         <div>
