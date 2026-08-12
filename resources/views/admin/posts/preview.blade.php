@@ -46,6 +46,8 @@
                     src="{{ asset('storage/' . $post->thumbnail) }}"
                     alt="{{ $post->title }}"
                     class="mt-8 max-h-[420px] w-full rounded-xl object-cover"
+                    loading="lazy"
+                    decoding="async"
                 >
             @endif
 

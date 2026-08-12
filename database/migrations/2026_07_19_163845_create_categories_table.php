@@ -9,18 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void{
-    Schema::create('categories', function (Blueprint $table) {
-        $table->id();
+    public function up(): void
+    {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id();
 
-        $table->string('name', 100);
+            $table->string('name', 100);
 
-        $table->string('slug')->unique();
+            $table->string('slug')->unique();
 
-        $table->text('description')->nullable();
+            $table->text('description')->nullable();
 
-        $table->timestamps();
-    });
+            $table->timestamps();
+        });
     }
 
     /**

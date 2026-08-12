@@ -50,6 +50,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (Auth::user()?->isBlocked()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Tai khoan cua ban da bi khoa.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

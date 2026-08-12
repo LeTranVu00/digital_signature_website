@@ -1,0 +1,70 @@
+@layer components {
+    .post-content {
+        color: #1f2937;
+        font-size: 1.0625rem;
+        font-weight: 500;
+        line-height: 1.85;
+    }
+
+    .post-content h2,
+    .post-content h3,
+    .post-content h4 {
+        color: #111827;
+        font-weight: 800;
+        line-height: 1.2;
+        margin: 1.25em 0 0.6em;
+    }
+
+    .post-content h2 {
+        font-size: 1.875rem;
+    }
+
+    .post-content h3 {
+        font-size: 1.5rem;
+    }
+
+    .post-content h4 {
+        font-size: 1.25rem;
+    }
+
+    .post-content p {
+        margin-bottom: 1rem;
+    }
+
+    .post-content ul,
+    .post-content ol {
+        margin: 0 0 1rem 1.5rem;
+        padding-left: 1.25rem;
+    }
+
+    .post-content ul {
+        list-style: disc;
+    }
+
+    .post-content ol {
+        list-style: decimal;
+    }
+
+    .post-content a {
+        color: #dc2626;
+        text-decoration: underline;
+    }
+
+    .post-content table {
+        margin-bottom: 1rem;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .post-content th,
+    .post-content td {
+        border: 1px solid #d1d5db;
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+    }
+}

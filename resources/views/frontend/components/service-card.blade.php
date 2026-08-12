@@ -1,13 +1,13 @@
-<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-xl font-bold text-blue-700">
+<div class="site-feature-card">
+    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 text-xl font-extrabold text-amber-700 ring-4 ring-amber-100/70">
         {{ $number }}
     </div>
 
-    <h3 class="text-lg font-bold text-gray-950">
+    <h3 class="text-xl font-extrabold text-slate-950">
         {{ $title }}
     </h3>
 
-    <p class="mt-3 text-sm leading-6 text-gray-600">
+    <p class="mt-3 text-base font-medium leading-7 text-slate-600">
         {{ $description }}
     </p>
 </div>

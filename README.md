@@ -1,58 +1,258 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Digital Signature Website
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Website doanh nghiep cho dich vu chu ky so, hoa don dien tu va hop dong dien tu. Du an gom frontend gioi thieu dich vu, blog, form lien he tao lead, va khu vuc admin quan ly noi dung.
 
-## About Laravel
+## Cong Nghe
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3+
+- Laravel 13
+- Laravel Breeze authentication
+- SQLite mac dinh cho local, MySQL khuyen dung cho production
+- Vite
+- Tailwind CSS
+- Alpine.js
+- Flowbite
+- TinyMCE cho noi dung bai viet
+- PHPUnit cho automated tests
+- Laravel Pint cho code style
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tinh Nang Chinh
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Auth dang ky, dang nhap, xac thuc email, Google login.
+- Role `admin` va `user`.
+- Khoa tai khoan bang `status = active / blocked`.
+- Admin dashboard voi thong ke bai viet, user, comment, views.
+- Quan ly category.
+- Quan ly post: draft, published, soft delete, restore, force delete, upload thumbnail.
+- Blog frontend chi hien bai published.
+- Comment nested 1 cap, soft delete, policy update/delete.
+- Like/dislike comment bang Fetch API, moi user chi co mot vote.
+- Form lien he luu database va gui email admin.
+- Admin quan ly comments, contacts, users.
+- Rate limit cho login, register, comment, vote, contact form va upload.
+- Sanitize HTML TinyMCE server-side truoc khi luu post.
 
-## Learning Laravel
+## Yeu Cau He Thong
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP `^8.3`
+- Composer
+- Node.js va npm
+- SQLite extension cho local hoac MySQL server cho production
+- SMTP account neu muon gui mail that
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Cai Dat Local
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
+copy .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Neu dung SQLite:
 
-## Contributing
+```bash
+type nul > database\database.sqlite
+php artisan migrate --seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Neu dung MySQL, cap nhat cac bien `DB_*` trong `.env`, sau do chay:
 
-## Code of Conduct
+```bash
+php artisan migrate --seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Local co the tiep tuc dung SQLite de phat trien nhanh. Production nen dung MySQL vi phu hop hosting pho bien, quan ly backup tot hon va on dinh hon khi co nhieu nguoi truy cap dong thoi.
 
-## Security Vulnerabilities
+Tao public storage link cho thumbnail:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan storage:link
+```
 
-## License
+## Cau Hinh .env
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Cac bien quan trong:
+
+```env
+APP_NAME="Digital Signature"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=sqlite
+
+MAIL_MAILER=smtp
+MAIL_SCHEME=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-gmail@gmail.com
+MAIL_PASSWORD=your-google-app-password
+MAIL_FROM_ADDRESS=your-gmail@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+MAIL_ADMIN_ADDRESS=admin@example.com
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=
+```
+
+Voi Gmail SMTP, `MAIL_PASSWORD` phai la Google App Password, khong phai mat khau Gmail dang nhap binh thuong.
+
+## Migration Va Seeder
+
+Chay migration:
+
+```bash
+php artisan migrate
+```
+
+Chay seed demo:
+
+```bash
+php artisan db:seed
+```
+
+Hoac chay ca hai:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+## Tai Khoan Demo
+
+Seeder hien tao 2 tai khoan:
+
+```text
+Admin
+Email: admin@gmail.com
+Password: 12345678
+
+User
+Email: user@gmail.com
+Password: 12345678
+```
+
+## Chay Ung Dung
+
+Chay Laravel server:
+
+```bash
+php artisan serve
+```
+
+Chay Vite dev server:
+
+```bash
+npm run dev
+```
+
+Mo website:
+
+```text
+http://127.0.0.1:8000
+```
+
+Khu vuc admin:
+
+```text
+http://127.0.0.1:8000/admin/dashboard
+```
+
+## Kiem Thu Va Chuan Hoa Code
+
+Chay Laravel Pint:
+
+```bash
+vendor\bin\pint
+```
+
+PHP lint toan bo file PHP:
+
+```bash
+Get-ChildItem -Recurse -Filter *.php -File |
+  Where-Object { $_.FullName -notmatch '\\vendor\\|\\storage\\framework\\views\\' } |
+  ForEach-Object { php -l $_.FullName }
+```
+
+Chay automated tests:
+
+```bash
+php artisan test
+```
+
+Build frontend:
+
+```bash
+npm run build
+```
+
+Du an hien chua cau hinh ESLint. Neu them ESLint sau nay, nen them script `npm run lint` vao `package.json`.
+
+## Deploy
+
+### Chuyen Tu SQLite Sang MySQL Khi Trien Khai
+
+Khong copy truc tiep file `database/database.sqlite` len server roi mong MySQL doc duoc. SQLite va MySQL la hai he quan tri du lieu khac nhau.
+
+Luong trien khai production moi:
+
+```text
+Tao database MySQL
+-> Cau hinh DB_* trong production .env
+-> php artisan migrate --force
+-> php artisan db:seed --force
+```
+
+Vi du production `.env` voi MySQL:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=digital_signature
+DB_USERNAME=digital_signature_user
+DB_PASSWORD=your-strong-password
+```
+
+Neu can giu du lieu that dang nam trong SQLite local, can lam mot buoc migrate du lieu rieng: export du lieu tu SQLite, map schema/format, import vao MySQL va kiem tra lai quan he, timestamp, soft deletes. Khong nen lam viec nay bang cach copy file SQLite.
+
+Checklist deploy co ban:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Production `.env` can dam bao:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-domain.com
+DB_CONNECTION=mysql
+```
+
+Khuyen nghi truoc deploy:
+
+- Doi mat khau tai khoan demo hoac xoa demo users.
+- Cau hinh SMTP that va `MAIL_ADMIN_ADDRESS`.
+- Dung database production rieng, backup dinh ky.
+- Tro web server vao thu muc `public`.
+- Cap quyen ghi cho `storage` va `bootstrap/cache`.
+- Bat HTTPS va redirect HTTP sang HTTPS.
+- Backup database va file upload trong `storage/app/public`.
+- Cau hinh cron Laravel scheduler neu co scheduled jobs.
+- Cau hinh queue worker neu chuyen email/job sang queue.
+- Cau hinh log rotation va theo doi loi production.
+- Khong commit file `.env`.
+- Chay `php artisan test` va `npm run build` truoc khi release.
+
+Runbook deploy chi tiet nam trong [DEPLOYMENT.md](DEPLOYMENT.md).

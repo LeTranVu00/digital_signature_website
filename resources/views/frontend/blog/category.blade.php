@@ -1,33 +1,33 @@
 @extends('frontend.layouts.app')
 
-@section('title', $category->name . ' - Digital Signature')
+@section('title', $category->name . ' - Diễn đàn')
 
 @section('content')
-    <section class="bg-gray-950 py-20 text-white">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p class="text-sm font-semibold uppercase text-blue-200">Danh mục</p>
-            <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight">
+    <section class="relative overflow-hidden bg-zinc-950 py-20 text-white sm:py-24" data-scroll-section="Danh mục diễn đàn">
+        <div class="absolute inset-0 ui-mesh-bg opacity-70"></div>
+        <div class="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8" data-reveal="fade-up">
+            <h1 class="site-page-title">
                 {{ $category->name }}
             </h1>
             @if ($category->description)
-                <p class="mt-5 max-w-2xl leading-8 text-gray-200">
+                <p class="site-page-copy">
                     {{ $category->description }}
                 </p>
             @endif
         </div>
     </section>
 
-    <section class="bg-white py-16">
+    <section class="site-section-cool" data-scroll-section="Chủ đề trong danh mục">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-8 flex flex-wrap gap-3">
+            <div class="mb-10 flex flex-wrap justify-center gap-3" data-reveal="fade-up">
                 <a href="{{ route('blog.index') }}"
-                   class="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:border-blue-700 hover:text-blue-700">
-                    Tất cả
+                   class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-amber-700 hover:bg-amber-50 hover:text-amber-700">
+                    Tất cả chủ đề
                 </a>
 
                 @foreach ($categories as $item)
                     <a href="{{ route('blog.category', $item->slug) }}"
-                       class="rounded-full px-4 py-2 text-sm font-semibold {{ $item->is($category) ? 'bg-blue-700 text-white' : 'border border-gray-300 text-gray-700 hover:border-blue-700 hover:text-blue-700' }}">
+                       class="rounded-full px-4 py-2 text-sm font-semibold transition {{ $item->is($category) ? 'bg-zinc-950 text-white shadow-sm' : 'border border-slate-300 text-slate-700 hover:border-amber-700 hover:bg-amber-50 hover:text-amber-700' }}">
                         {{ $item->name }}
                     </a>
                 @endforeach
@@ -35,17 +35,19 @@
 
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @forelse ($posts as $post)
-                    @include('frontend.components.post-card', ['post' => $post])
-                @empty
-                    <div class="rounded-xl border border-dashed border-gray-300 p-8 text-gray-500 md:col-span-2 lg:col-span-3">
-                        Chưa có bài viết công khai trong danh mục này.
+                    <div data-reveal="fade-up" data-reveal-delay="{{ $loop->index * 70 }}">
+                        @include('frontend.components.post-card', ['post' => $post])
                     </div>
+                @empty
+                    <x-ui.empty-state
+                        class="md:col-span-2 lg:col-span-3"
+                        title="Chưa có chủ đề công khai"
+                        description="Chưa có chủ đề công khai trong danh mục này."
+                    />
                 @endforelse
             </div>
 
-            <div class="mt-10">
-                {{ $posts->links() }}
-            </div>
+            <x-ui.pagination :paginator="$posts" class="mt-10" />
         </div>
     </section>
 @endsection

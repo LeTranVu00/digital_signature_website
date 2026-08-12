@@ -104,7 +104,7 @@ class FrontendBlogTest extends TestCase
         $categoryId = $overrides['category_id']
             ?? Category::query()->create([
                 'name' => 'Tin tức',
-                'slug' => 'tin-tuc-' . Str::random(8),
+                'slug' => 'tin-tuc-'.Str::random(8),
             ])->id;
 
         $userId = $overrides['user_id']
@@ -114,7 +114,7 @@ class FrontendBlogTest extends TestCase
             'user_id' => $userId,
             'category_id' => $categoryId,
             'title' => 'Bài viết công khai',
-            'slug' => 'bai-viet-cong-khai-' . Str::random(8),
+            'slug' => 'bai-viet-cong-khai-'.Str::random(8),
             'summary' => 'Tóm tắt bài viết',
             'content' => '<p>Nội dung bài viết</p>',
             'thumbnail' => null,

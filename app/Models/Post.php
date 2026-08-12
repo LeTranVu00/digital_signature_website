@@ -2,28 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-    'user_id',
-    'category_id',
-    'title',
-    'slug',
-    'summary',
-    'content',
-    'thumbnail',
-    'status',
-    'views',
-    'published_at',
+        'user_id',
+        'category_id',
+        'title',
+        'slug',
+        'summary',
+        'content',
+        'thumbnail',
+        'status',
+        'views',
+        'published_at',
     ];
 
     protected function casts(): array
@@ -51,7 +51,12 @@ class Post extends Model
     public function scopeSearch(Builder $query, ?string $search): Builder
     {
         return $query->when($search, function (Builder $query) use ($search) {
-            $query->where('title', 'like', '%' . $search . '%');
+            $query->where(function (Builder $query) use ($search) {
+                $query
+                    ->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('summary', 'like', '%'.$search.'%')
+                    ->orWhere('content', 'like', '%'.$search.'%');
+            });
         });
     }
 

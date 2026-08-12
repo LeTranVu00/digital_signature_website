@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model
 {
@@ -64,5 +64,15 @@ class Comment extends Model
     public function votes(): HasMany
     {
         return $this->hasMany(CommentVote::class);
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->votes()->where('vote', 1);
+    }
+
+    public function dislikes(): HasMany
+    {
+        return $this->votes()->where('vote', -1);
     }
 }

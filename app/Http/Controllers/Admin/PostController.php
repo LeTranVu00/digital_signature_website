@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
@@ -11,6 +10,7 @@ use App\Models\Post;
 use App\Services\SlugService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Throwable;
 
@@ -82,8 +82,7 @@ class PostController extends Controller
     public function store(
         StorePostRequest $request,
         SlugService $slugService
-    ): RedirectResponse
-    {
+    ): RedirectResponse {
         $data = $request->validated();
 
         $data['user_id'] = $request->user()->id;
@@ -243,6 +242,7 @@ class PostController extends Controller
                 'Đã chuyển bài viết vào thùng rác.'
             );
     }
+
     /**
      * Hiển thị danh sách bài viết đã xóa mềm.
      */
@@ -255,6 +255,7 @@ class PostController extends Controller
 
         return view('admin.posts.trash', compact('posts'));
     }
+
     /**
      * Khôi phục bài viết từ thùng rác.
      */
@@ -269,6 +270,7 @@ class PostController extends Controller
             ->route('admin.posts.trash')
             ->with('success', 'Khôi phục bài viết thành công.');
     }
+
     /**
      * Xóa vĩnh viễn bài viết và thumbnail.
      */

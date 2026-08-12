@@ -32,7 +32,7 @@ return new class extends Migration
             // Một người chỉ được vote một lần cho một bình luận
             $table->unique([
                 'comment_id',
-                'user_id'
+                'user_id',
             ]);
         });
     }

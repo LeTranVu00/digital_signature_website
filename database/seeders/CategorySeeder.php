@@ -11,17 +11,19 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Tin tức',
+            'Hội kế toán',
             'Chữ ký số',
             'Hóa đơn điện tử',
-            'Tin công nghệ',
-            'Hướng dẫn',
+            'Hỏi đáp doanh nghiệp',
+            'Phần mềm hỗ trợ',
+            'Báo giá',
         ];
 
         foreach ($categories as $category) {
-            Category::create([
-                'name' => $category,
+            Category::query()->firstOrCreate([
                 'slug' => Str::slug($category),
+            ], [
+                'name' => $category,
                 'description' => $category,
             ]);
         }
