@@ -98,7 +98,7 @@
                                 type="search"
                                 name="search"
                                 class="w-full border-0 bg-transparent p-0 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0"
-                                placeholder="Tìm: chữ ký số, hóa đơn, phần mềm, kế toán..."
+                                placeholder="Tìm: chữ ký số, hóa đơn, phần mềm, liên hệ, ..."
                             >
                         </div>
                         <button
