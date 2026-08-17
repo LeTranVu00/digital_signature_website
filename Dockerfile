@@ -3,8 +3,8 @@ FROM php:8.3-apache
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev zip unzip \
-    libzip-dev libicu-dev libgd-dev nodejs npm \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl \
+    libzip-dev libicu-dev libgd-dev nodejs npm libpq-dev \
+    && docker-php-ext-install pdo_mysql pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
