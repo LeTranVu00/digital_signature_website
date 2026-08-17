@@ -20,7 +20,7 @@
             @foreach ($contacts as $index => $item)
                 <article class="site-feature-card" data-reveal="fade-up" data-reveal-delay="{{ $index * 80 }}">
                     <h2 class="text-lg font-extrabold text-slate-950">{{ $item['title'] }}</h2>
-                    <p class="mt-2 text-3xl font-extrabold text-red-600">{{ $item['value'] }}</p>
+                    <p class="mt-2 text-3xl font-extrabold text-red-600 [overflow-wrap:anywhere]">{{ $item['value'] }}</p>
                     <p class="mt-3 text-base font-medium leading-7 text-slate-600">{{ $item['desc'] }}</p>
                 </article>
             @endforeach
@@ -37,19 +37,27 @@
                     {{ $contactContent['form_copy'] }}
                 </p>
 
-                <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                    @foreach ($qrCards as $card)
-                        <div class="site-feature-card p-4">
-                            <img
-                                src="{{ asset($card['image']) }}"
-                                alt="{{ $card['alt'] ?: $card['label'] }}"
-                                class="aspect-square w-full rounded-lg object-cover"
-                                loading="lazy"
-                            >
-                            <p class="text-sm font-semibold text-slate-950">{{ $card['label'] }}</p>
-                        </div>
-                    @endforeach
-                </div>
+                @if (! empty($qrCard['url']))
+                    <div class="mt-7 flex justify-center">
+                        <a
+                            href="{{ $qrCard['url'] }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group block w-full max-w-72 rounded-lg border border-amber-200/80 bg-gradient-to-br from-white via-amber-50/40 to-sky-50/70 p-5 text-center shadow-[0_26px_80px_-48px_rgb(15_23_42/0.65)] ring-1 ring-white transition duration-200 ease-out hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_30px_90px_-46px_rgb(15_23_42/0.72)]"
+                        >
+                            <div
+                                class="mx-auto flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-inner shadow-slate-200/70 transition group-hover:border-amber-200"
+                                data-qr-code
+                                data-qr-value="{{ $qrCard['url'] }}"
+                                data-qr-label="{{ $qrCard['label'] }}"
+                                data-qr-size="260"
+                            ></div>
+                            @if ($qrCard['label'] !== '')
+                                <p class="mt-4 text-sm font-extrabold leading-5 text-slate-950">{{ $qrCard['label'] }}</p>
+                            @endif
+                        </a>
+                    </div>
+                @endif
             </div>
 
             <form action="{{ route('contact.store') }}"
@@ -63,6 +71,7 @@
                     label="Họ tên"
                     :value="old('name')"
                     required
+                    :show-required-mark="false"
                     maxlength="255"
                 />
 
@@ -72,33 +81,17 @@
                     label="Email"
                     :value="old('email')"
                     required
-                    maxlength="255"
-                />
-
-                <x-ui.input
-                    name="phone"
-                    label="Điện thoại"
-                    :value="old('phone')"
-                    maxlength="30"
-                />
-
-                <x-ui.input
-                    name="company"
-                    label="Công ty"
-                    :value="old('company')"
+                    :show-required-mark="false"
                     maxlength="255"
                 />
 
                 <div class="md:col-span-2">
-                    <x-ui.select name="service" label="Dịch vụ quan tâm">
-                        <option value="">Chọn dịch vụ</option>
-
-                        @foreach (\App\Models\Contact::SERVICES as $value => $label)
-                            <option value="{{ $value }}" @selected(old('service') === $value)>
-                                {{ $label }}
-                            </option>
-                        @endforeach
-                    </x-ui.select>
+                    <x-ui.input
+                        name="phone"
+                        label="Điện thoại"
+                        :value="old('phone')"
+                        maxlength="30"
+                    />
                 </div>
 
                 <div class="md:col-span-2">
@@ -108,11 +101,12 @@
                         :value="old('message')"
                         rows="5"
                         required
+                        :show-required-mark="false"
                         maxlength="5000"
                     />
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="flex justify-end md:col-span-2">
                     <x-ui.button type="submit">
                         Gửi yêu cầu tư vấn
                     </x-ui.button>
@@ -121,38 +115,4 @@
         </div>
     </section>
 
-    <section class="site-section-mist" data-scroll-section="Thông tin công ty">
-        <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <article class="site-feature-card" data-reveal="fade-right">
-                <h2 class="text-3xl font-extrabold text-slate-950">{{ $contactContent['company_name'] }}</h2>
-                <dl class="mt-5 grid gap-4 text-base font-medium text-slate-700">
-                    <div>
-                        <dt class="font-bold text-slate-950">Địa chỉ</dt>
-                        <dd class="mt-1">{{ $contactContent['address'] }}</dd>
-                    </div>
-                    <div>
-                        <dt class="font-bold text-slate-950">Số điện thoại</dt>
-                        <dd class="mt-1">{{ $contactContent['phone'] }}</dd>
-                    </div>
-                    <div>
-                        <dt class="font-bold text-slate-950">Email</dt>
-                        <dd class="mt-1">{{ $contactContent['email'] }}</dd>
-                    </div>
-                </dl>
-            </article>
-
-            <article class="site-feature-card" data-reveal="fade-left">
-                <h2 class="text-3xl font-extrabold text-slate-950">Thông tin thanh toán</h2>
-                <div class="mt-5 grid gap-4">
-                    @foreach ($bankAccounts as $account)
-                        <div class="rounded-lg border border-amber-200/80 bg-amber-50/70 p-4 text-base font-medium text-slate-700">
-                            <p class="font-bold text-slate-950">{{ $account['bank'] }}</p>
-                            <p class="mt-2">Số tài khoản: <span class="font-semibold">{{ $account['account'] }}</span></p>
-                            <p class="mt-1">Chủ tài khoản: <span class="font-semibold">{{ $account['owner'] }}</span></p>
-                        </div>
-                    @endforeach
-                </div>
-            </article>
-        </div>
-    </section>
 @endsection

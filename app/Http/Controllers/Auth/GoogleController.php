@@ -15,6 +15,12 @@ class GoogleController extends Controller
 {
     public function redirect(): RedirectResponse
     {
+        if (! $this->googleLoginIsConfigured()) {
+            return redirect()
+                ->route('login')
+                ->with('status', 'Đăng nhập Google chưa được cấu hình.');
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -65,5 +71,12 @@ class GoogleController extends Controller
         request()->session()->regenerate();
 
         return redirect()->intended(route('home'));
+    }
+
+    private function googleLoginIsConfigured(): bool
+    {
+        return filled(config('services.google.client_id'))
+            && filled(config('services.google.client_secret'))
+            && filled(config('services.google.redirect'));
     }
 }

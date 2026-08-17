@@ -5,10 +5,9 @@ Tai lieu nay dung cho deploy production Digital Signature Website. Local co the 
 ## 1. Chuan Bi Server
 
 - PHP 8.3+ va cac extension Laravel can thiet.
-- Composer.
-- Node.js va npm.
+- Composer va Node.js/npm neu server co SSH.
 - MySQL database rieng cho production.
-- Web server tro document root vao thu muc `public`.
+- Web server tro document root vao thu muc `public` neu hosting cho phep.
 - HTTPS certificate cho domain production.
 - SMTP account de gui email that.
 
@@ -60,7 +59,7 @@ php artisan key:generate --force
 
 Khong commit `.env` len git.
 
-## 3. Deploy Code
+## 3. Deploy Code Tren VPS / Hosting Co SSH
 
 Chay tren server:
 
@@ -69,12 +68,27 @@ composer install --no-dev --optimize-autoloader
 npm ci
 npm run build
 php artisan migrate --force
-php artisan db:seed --force
 php artisan storage:link
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
+
+Neu can seed tai khoan admin production, truoc khi chay seeder phai dat cac bien sau trong `.env`:
+
+```env
+ADMIN_NAME="Administrator"
+ADMIN_EMAIL=admin@tenmien.com
+ADMIN_PASSWORD=mat-khau-rieng-toi-thieu-12-ky-tu
+```
+
+Sau do chay:
+
+```bash
+php artisan db:seed --force
+```
+
+Khong dat cac bien `SEED_USER_*` tren production.
 
 Khong copy truc tiep file SQLite len MySQL. Neu can giu du lieu that tu SQLite, can export/import du lieu rieng va kiem tra lai schema, foreign key, timestamp, soft delete.
 
@@ -136,6 +150,49 @@ Sau moi lan deploy co queue worker, chay:
 php artisan queue:restart
 ```
 
+## 9. Deploy Rieng Cho InfinityFree
+
+InfinityFree co PHP/MySQL/.htaccess nhung khong phai moi truong Laravel day du nhu VPS. Nen build va chuan bi tren may local, sau do upload ban da san sang.
+
+Chay tren local truoc khi upload:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+Neu chua co database production, tao MySQL tren control panel InfinityFree. Do InfinityFree thuong khong co SSH/artisan tren server, nen co 2 cach:
+
+- Chay migration/seed tren mot MySQL local co schema tuong tu, export file `.sql`, roi import bang phpMyAdmin tren InfinityFree.
+- Hoac import schema/du lieu thu cong bang phpMyAdmin neu ban da co file SQL rieng.
+
+Upload toan bo Laravel codebase vao `htdocs`, bao gom:
+
+- `app`, `bootstrap`, `config`, `database`, `public`, `resources`, `routes`, `storage`, `vendor`
+- `composer.json`, `composer.lock`, `artisan`
+- Thu muc `public/build` da duoc tao boi `npm run build`
+- File `.env` production da tao tu `.env.production.example`
+- File `.htaccess` o root project va file `public/.htaccess`
+
+Khong upload:
+
+- `.git`, `node_modules`, `.env` local, log local, cache local
+- `tests` neu muon goi deploy gon hon
+
+Voi upload anh, production `.env` nen de:
+
+```env
+FILESYSTEM_PUBLIC_ROOT=public/storage
+```
+
+Va tao thu muc `public/storage` tren hosting neu chua co. Cau hinh nay giup upload ghi truc tiep vao public storage, khong can `php artisan storage:link`.
+
+Neu domain dang tro vao `htdocs` thay vi `htdocs/public`, root `.htaccess` trong repo se rewrite request vao `public/` va chan truy cap cac thu muc Laravel nhay cam.
+
 ## 8. Log Rotation
 
 Khong de `storage/logs/laravel.log` phinh vo han. Cau hinh log rotation cua server hoac dung daily log:
@@ -152,7 +209,7 @@ storage/logs
 storage/app/public
 ```
 
-## 9. Theo Doi Loi
+## 10. Theo Doi Loi
 
 Toi thieu can theo doi:
 
@@ -165,7 +222,7 @@ Toi thieu can theo doi:
 
 Co the dung dich vu nhu Sentry, Bugsnag, hosting monitoring, hoac log collector rieng.
 
-## 10. Checklist Sau Deploy
+## 11. Checklist Sau Deploy
 
 - Trang chu load duoc.
 - `/blog` hien bai published.

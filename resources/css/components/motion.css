@@ -46,6 +46,13 @@
         opacity: 1;
         transform: translate3d(0, 0, 0) scale(1);
     }
+
+    @media (max-width: 1024px) {
+        .reveal-enabled [data-reveal="fade-left"],
+        .reveal-enabled [data-reveal="fade-right"] {
+            transform: translate3d(0, 14px, 0);
+        }
+    }
 }
 
 @keyframes ui-fade-up {

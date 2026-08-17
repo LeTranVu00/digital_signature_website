@@ -25,7 +25,7 @@
             <div class="mb-8 flex flex-col gap-4 rounded-2xl border border-amber-100 bg-white/90 p-5 shadow-[0_24px_70px_-48px_rgb(15_23_42/0.55)] sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm font-extrabold uppercase text-red-600">Bảng giá chi tiết</p>
-                    <h2 class="mt-1 text-2xl font-extrabold text-slate-950">{{ $pricingPlan['price'] ?? 'Liên hệ' }}</h2>
+                    <h2 class="mt-1 text-2xl font-extrabold text-slate-950">{{ $pricingPlan['name'] ?? 'Chi tiết báo giá' }}</h2>
                 </div>
 
                 <div class="flex flex-wrap gap-3">

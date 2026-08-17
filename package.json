@@ -20,6 +20,25 @@
     "dependencies": {
         "flowbite": "^4.0.2",
         "flowbite-datepicker": "^2.0.0",
+        "qrcode": "^1.5.4",
         "tinymce": "^8.8.0"
-    }
+    },
+    "name": "digital-signature-website",
+    "version": "1.0.0",
+    "description": "Website doanh nghiep cho dich vu chu ky so, hoa don dien tu va hop dong dien tu. Du an gom frontend gioi thieu dich vu, blog, form lien he tao lead, va khu vuc admin quan ly noi dung.",
+    "main": "tailwind.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LeTranVu00/digital_signature_website.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/LeTranVu00/digital_signature_website/issues"
+    },
+    "homepage": "https://github.com/LeTranVu00/digital_signature_website#readme"
 }

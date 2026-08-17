@@ -2,15 +2,23 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Contact;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreContactRequest extends FormRequest
 {
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'name' => $this->cleanText('name'),
+            'email' => strtolower($this->cleanText('email')),
+            'phone' => $this->cleanText('phone'),
+            'message' => $this->cleanText('message'),
+        ]);
     }
 
     /**
@@ -22,9 +30,18 @@ class StoreContactRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'company' => ['nullable', 'string', 'max:255'],
-            'service' => ['nullable', 'string', Rule::in(array_keys(Contact::SERVICES))],
             'message' => ['required', 'string', 'max:5000'],
         ];
+    }
+
+    private function cleanText(string $key): ?string
+    {
+        $value = $this->input($key);
+
+        if ($value === null) {
+            return null;
+        }
+
+        return trim(strip_tags((string) $value));
     }
 }

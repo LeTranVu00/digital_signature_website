@@ -78,7 +78,6 @@
                     @foreach ($pricingPlans as $index => $plan)
                         <article class="site-feature-card flex h-full flex-col" data-reveal="fade-up" data-reveal-delay="{{ $index * 80 }}">
                             <h2 class="text-2xl font-extrabold text-slate-950">{{ $plan['name'] }}</h2>
-                            <p class="mt-4 text-4xl font-extrabold text-red-600">{{ $plan['price'] }}</p>
                             <p class="mt-4 text-base font-medium leading-7 text-slate-600">{{ $plan['desc'] }}</p>
 
                             <ul class="mt-6 grid gap-3 text-base font-medium text-slate-700">
@@ -100,24 +99,4 @@
         </div>
     </section>
 
-    <section class="site-section-cool" data-scroll-section="Ghi chú báo giá">
-        <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-            <div data-reveal="fade-right">
-                <h2 class="site-section-title">
-                    {{ $pricingContent['notes_title'] }}
-                </h2>
-                <p class="mt-5 site-section-copy">
-                    {{ $pricingContent['notes_copy'] }}
-                </p>
-            </div>
-
-            <div class="grid gap-4" data-reveal="fade-left">
-                @foreach ($notes as $note)
-                    <div class="site-feature-card text-base font-medium leading-7 text-slate-700">
-                        {{ $note }}
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
 @endsection

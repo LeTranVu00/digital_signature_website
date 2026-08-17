@@ -7,6 +7,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ProfileUpdateRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'name' => trim(strip_tags((string) $this->input('name'))),
+            'phone' => $this->input('phone') === null
+                ? null
+                : trim(strip_tags((string) $this->input('phone'))),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

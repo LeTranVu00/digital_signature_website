@@ -5,6 +5,7 @@ import { initCommentVotes } from './ui/comment-votes';
 import { initCounters } from './ui/counters';
 import { initFormScrollRestoration, registerForms } from './ui/forms';
 import { registerModal } from './ui/modal';
+import { initQrCodes } from './ui/qr-code';
 import { initScrollReveal } from './ui/reveal';
 import { registerScrollNavigator } from './ui/scroll-navigator';
 import { registerSidebar } from './ui/sidebar';
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initCounters();
     initCommentVotes();
+    initQrCodes();
     initFormScrollRestoration();
 
     if (document.querySelector('.tinymce-editor')) {

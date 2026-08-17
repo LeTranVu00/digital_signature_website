@@ -25,7 +25,7 @@ class AdminSiteContentTest extends TestCase
             ->assertSee('data-toggle-plan-delete', false)
             ->assertSee('showSiteContentToast', false)
             ->assertSee('x-on:submit.prevent="saveContent($event)"', false)
-            ->assertSee('name="plans[0][price]"', false)
+            ->assertDontSee('name="plans[0][price]"', false)
             ->assertSee('Danh dau xoa goi nay khi luu', false)
             ->assertSee('x-bind:disabled="! deletePlan"', false);
 
@@ -34,6 +34,105 @@ class AdminSiteContentTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/<details(?=[^>]*data-pricing-plan="0")(?=[^>]*\bopen\b)[^>]*>/s', $content);
         $this->assertDoesNotMatchRegularExpression('/<details(?=[^>]*data-pricing-plan="__INDEX__")(?=[^>]*\bopen\b)[^>]*>/s', $content);
         $this->assertStringNotContainsString('node.open = true', $content);
+    }
+
+    public function test_admin_can_update_home_youtube_video_link(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.site-content.index', ['tab' => 'home']))
+            ->assertOk()
+            ->assertSee('name="youtube_embed_url"', false)
+            ->assertSee('name="video_thumbnail"', false)
+            ->assertSee('data-add-home-repeater="services"', false)
+            ->assertSee('data-blank-home-repeater-template="process_steps"', false)
+            ->assertSee('data-blank-home-repeater-template="stats"', false)
+            ->assertSee('Chưa có ô giới thiệu nào', false)
+            ->assertSee('<details', false);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'home'), [
+                'hero_title' => 'Trang chu',
+                'hero_copy' => 'Mo ta hero',
+                'intro_text' => 'Noi dung gioi thieu',
+                'process_intro' => 'Quy trinh ro rang',
+                'youtube_embed_url' => 'https://www.youtube.com/watch?v=UiF2jKUSaQk&list=RDUiF2jKUSaQk&start_radio=1',
+                'cta_title' => 'Can ho tro?',
+                'cta_copy' => 'Lien he chung toi.',
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'home']));
+
+        $this->assertSame(
+            'https://www.youtube.com/embed/UiF2jKUSaQk',
+            SiteSetting::valueFor('home')['youtube_embed_url']
+        );
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('https://www.youtube.com/embed/UiF2jKUSaQk', false);
+    }
+
+    public function test_admin_can_add_and_delete_dynamic_home_rows(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'home'), [
+                'hero_title' => 'Trang chu',
+                'hero_copy' => 'Mo ta hero',
+                'intro_text' => 'Noi dung gioi thieu',
+                'services' => [
+                    ['title' => 'Giu lai', 'desc' => 'Noi dung giu lai'],
+                    ['delete' => '1', 'title' => 'Xoa di', 'desc' => 'Noi dung xoa'],
+                ],
+                'process_intro' => 'Quy trinh ro rang',
+                'process_steps' => [
+                    ['title' => 'Buoc giu lai', 'desc' => 'Mo ta buoc'],
+                    ['delete' => '1', 'title' => 'Buoc xoa', 'desc' => 'Mo ta xoa'],
+                ],
+                'stats' => [
+                    ['value' => '10+', 'label' => 'Ho so'],
+                    ['delete' => '1', 'value' => '99+', 'label' => 'Xoa'],
+                ],
+                'cta_title' => 'Can ho tro?',
+                'cta_copy' => 'Lien he chung toi.',
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'home']));
+
+        $home = SiteSetting::valueFor('home');
+
+        $this->assertSame([['title' => 'Giu lai', 'desc' => 'Noi dung giu lai']], $home['services']);
+        $this->assertSame([['title' => 'Buoc giu lai', 'desc' => 'Mo ta buoc']], $home['process_steps']);
+        $this->assertSame([['value' => '10+', 'label' => 'Ho so']], $home['stats']);
+    }
+
+    public function test_admin_can_update_home_video_thumbnail(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'home'), [
+                'hero_title' => 'Trang chu',
+                'hero_copy' => 'Mo ta hero',
+                'intro_text' => 'Noi dung gioi thieu',
+                'process_intro' => 'Quy trinh ro rang',
+                'video_thumbnail' => UploadedFile::fake()->image('thumbnail-video.jpg', 1280, 720),
+                'cta_title' => 'Can ho tro?',
+                'cta_copy' => 'Lien he chung toi.',
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'home']));
+
+        $thumbnail = SiteSetting::valueFor('home')['video_thumbnail'];
+
+        $this->assertStringStartsWith('home/', $thumbnail);
+        Storage::disk('public')->assertExists($thumbnail);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('storage/'.$thumbnail, false);
     }
 
     public function test_admin_can_open_software_links_as_collapsed_panels(): void
@@ -52,9 +151,6 @@ class AdminSiteContentTest extends TestCase
                         'desc' => 'Cong cu cai dat',
                     ],
                 ],
-                'support_title' => 'Ho tro',
-                'support_copy' => 'Mo ta ho tro',
-                'checklist' => ['Can USB Token'],
             ],
         ]);
 
@@ -125,9 +221,6 @@ class AdminSiteContentTest extends TestCase
                         ],
                     ],
                 ],
-                'support_title' => 'Ho tro',
-                'support_copy' => 'Mo ta ho tro',
-                'checklist' => ['Can USB Token'],
             ],
         ]);
 
@@ -176,11 +269,6 @@ class AdminSiteContentTest extends TestCase
                         ],
                     ],
                 ],
-                'support_title' => 'Ho tro',
-                'support_copy' => 'Mo ta ho tro',
-                'checklist' => [
-                    ['text' => 'Can USB Token'],
-                ],
             ])
             ->assertRedirect(route('admin.site-content.index', ['tab' => 'software']));
 
@@ -196,6 +284,42 @@ class AdminSiteContentTest extends TestCase
         $this->assertSame('Danh muc moi', $categories[1]['name']);
         $this->assertSame('Phan mem danh muc moi', $categories[1]['items'][0]['name']);
         $this->assertCount(3, $items);
+    }
+
+    public function test_admin_can_update_contact_zalo_qr_link(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.site-content.index', ['tab' => 'contact']))
+            ->assertOk()
+            ->assertSee('name="qr_card[label]"', false)
+            ->assertSee('name="qr_card[url]"', false)
+            ->assertDontSee('qr_cards[0][image]', false);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'contact'), [
+                'hero_title' => 'Lien he',
+                'hero_copy' => 'Mo ta lien he',
+                'form_title' => 'Gui thong tin',
+                'form_copy' => 'Mo ta form',
+                'qr_card' => [
+                    'label' => 'QR Zalo tu dong',
+                    'url' => 'https://zalo.me/0900000000',
+                ],
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'contact']));
+
+        $contact = SiteSetting::valueFor('contact');
+
+        $this->assertSame('QR Zalo tu dong', $contact['qr_card']['label']);
+        $this->assertSame('https://zalo.me/0900000000', $contact['qr_card']['url']);
+
+        $this->get(route('contact'))
+            ->assertOk()
+            ->assertSee('data-qr-code', false)
+            ->assertSee('data-qr-value="https://zalo.me/0900000000"', false)
+            ->assertSee('QR Zalo tu dong');
     }
 
     public function test_frontend_software_page_shows_category_tabs(): void
@@ -232,9 +356,6 @@ class AdminSiteContentTest extends TestCase
                         ],
                     ],
                 ],
-                'support_title' => 'Ho tro',
-                'support_copy' => 'Mo ta ho tro',
-                'checklist' => ['Can USB Token'],
             ],
         ]);
 
@@ -261,15 +382,11 @@ class AdminSiteContentTest extends TestCase
                 'plans' => [
                     [
                         'name' => 'Goi cu',
-                        'price' => '100k',
                         'desc' => 'Mo ta cu',
                         'features' => ['Tinh nang cu'],
                         'images' => [],
                     ],
                 ],
-                'notes_title' => 'Ghi chu cu',
-                'notes_copy' => 'Mo ta ghi chu cu',
-                'notes' => ['Ghi chu cu'],
             ],
         ]);
 
@@ -282,13 +399,11 @@ class AdminSiteContentTest extends TestCase
                 'plans' => [
                     0 => [
                         'name' => 'Goi da sua',
-                        'price' => '200k',
                         'desc' => 'Mo ta da sua',
                         'features_text' => "Tinh nang A\nTinh nang B",
                     ],
                     1 => [
                         'name' => 'Goi moi',
-                        'price' => 'Lien he',
                         'desc' => 'Mo ta goi moi',
                         'features_text' => 'Tinh nang moi',
                         'new_image_names' => ['Bang gia moi'],
@@ -296,11 +411,6 @@ class AdminSiteContentTest extends TestCase
                             UploadedFile::fake()->image('bang-gia-moi.jpg', 800, 600),
                         ],
                     ],
-                ],
-                'notes_title' => 'Ghi chu moi',
-                'notes_copy' => 'Mo ta ghi chu moi',
-                'notes' => [
-                    ['text' => 'Ghi chu moi'],
                 ],
             ])
             ->assertRedirect(route('admin.site-content.index', ['tab' => 'pricing']));
@@ -310,10 +420,10 @@ class AdminSiteContentTest extends TestCase
         $this->assertSame('Bang gia moi', $pricing['hero_title']);
         $this->assertCount(2, $pricing['plans']);
         $this->assertSame('Goi da sua', $pricing['plans'][0]['name']);
-        $this->assertSame('200k', $pricing['plans'][0]['price']);
+        $this->assertArrayNotHasKey('price', $pricing['plans'][0]);
         $this->assertSame(['Tinh nang A', 'Tinh nang B'], $pricing['plans'][0]['features']);
         $this->assertSame('Goi moi', $pricing['plans'][1]['name']);
-        $this->assertSame('Lien he', $pricing['plans'][1]['price']);
+        $this->assertArrayNotHasKey('price', $pricing['plans'][1]);
         $this->assertSame('Bang gia moi', $pricing['plans'][1]['images'][0]['name']);
         Storage::disk('public')->assertExists($pricing['plans'][1]['images'][0]['path']);
     }
@@ -331,7 +441,6 @@ class AdminSiteContentTest extends TestCase
                 'plans' => [
                     [
                         'name' => 'Goi can xoa',
-                        'price' => 'Lien he',
                         'desc' => 'Se bi xoa',
                         'features' => ['Tinh nang cu'],
                         'images' => [
@@ -340,15 +449,11 @@ class AdminSiteContentTest extends TestCase
                     ],
                     [
                         'name' => 'Goi giu lai',
-                        'price' => 'Lien he',
                         'desc' => 'Van con',
                         'features' => ['Tinh nang con lai'],
                         'images' => [],
                     ],
                 ],
-                'notes_title' => 'Ghi chu',
-                'notes_copy' => 'Mo ta ghi chu',
-                'notes' => ['Ghi chu cu'],
             ],
         ]);
 
@@ -364,15 +469,9 @@ class AdminSiteContentTest extends TestCase
                     ],
                     1 => [
                         'name' => 'Goi giu lai',
-                        'price' => 'Lien he',
                         'desc' => 'Van con',
                         'features_text' => 'Tinh nang con lai',
                     ],
-                ],
-                'notes_title' => 'Ghi chu',
-                'notes_copy' => 'Mo ta ghi chu',
-                'notes' => [
-                    ['text' => 'Ghi chu moi'],
                 ],
             ])
             ->assertRedirect(route('admin.site-content.index', ['tab' => 'pricing']));

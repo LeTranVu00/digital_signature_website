@@ -5,6 +5,16 @@
 @php
     $oldInput = session()->getOldInput();
     $activeSettings = array_replace_recursive($settings[$activeTab] ?? [], is_array($oldInput) ? $oldInput : (array) $oldInput);
+    $contactQrCard = $activeSettings['qr_card'] ?? [];
+
+    if (! is_array($contactQrCard)) {
+        $contactQrCard = [];
+    }
+
+    if (($contactQrCard['label'] ?? '') === '' && ! empty($activeSettings['qr_cards'][1]['label'] ?? '')) {
+        $contactQrCard['label'] = $activeSettings['qr_cards'][1]['label'];
+    }
+
     $pricingRows = array_values($activeSettings['plans'] ?? []);
     $iniBytes = function (string $value): int {
         $value = trim($value);
@@ -42,8 +52,8 @@
 
     if ($activeTab === 'software' && empty($softwareCategories) && ! empty($activeSettings['items'] ?? [])) {
         $softwareCategories = [[
-            'name' => 'Phần mềm chung',
-            'desc' => 'Các phần mềm hỗ trợ đang có.',
+            'name' => '',
+            'desc' => '',
             'items' => array_values($activeSettings['items'] ?? []),
         ]];
     }
@@ -852,6 +862,103 @@
                 return indexes.length ? Math.max(...indexes) + 1 : 0;
             };
 
+            const homeRepeaterLabels = {
+                services: { single: 'ô giới thiệu', add: 'Thêm ô' },
+                process_steps: { single: 'bước', add: 'Thêm bước' },
+                stats: { single: 'thống kê', add: 'Thêm thống kê' },
+            };
+
+            const nextHomeRepeaterIndex = (root, key) => {
+                const indexes = Array.from(root.querySelectorAll(`[data-home-repeater-item="${key}"]`))
+                    .map((item) => Number(item.dataset.homeIndex))
+                    .filter((index) => Number.isFinite(index));
+
+                return indexes.length ? Math.max(...indexes) + 1 : 0;
+            };
+
+            const setHomeRepeaterDeleteState = (button, shouldDelete) => {
+                const item = button.closest('[data-home-repeater-item]');
+                const input = item?.querySelector('[data-home-repeater-delete-input]');
+                const message = item?.querySelector('[data-home-repeater-delete-message]');
+
+                if (! item || ! input) {
+                    return;
+                }
+
+                input.disabled = ! shouldDelete;
+                button.setAttribute('aria-pressed', String(shouldDelete));
+                button.classList.toggle('border-red-200', shouldDelete);
+                button.classList.toggle('bg-red-50', shouldDelete);
+                button.classList.toggle('text-red-600', shouldDelete);
+                item.classList.toggle('border-red-200', shouldDelete);
+                item.classList.toggle('bg-red-50/50', shouldDelete);
+                button.querySelector('svg')?.replaceWith((shouldDelete ? (() => {
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = checkIcon;
+                    return wrapper.firstElementChild;
+                })() : (() => {
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = minusIcon;
+                    return wrapper.firstElementChild;
+                })()));
+                message?.classList.toggle('hidden', ! shouldDelete);
+            };
+
+            const toggleHomeRepeaterDelete = (button) => {
+                const item = button.closest('[data-home-repeater-item]');
+                const input = item?.querySelector('[data-home-repeater-delete-input]');
+                const key = item?.dataset.homeRepeaterItem || '';
+                const label = homeRepeaterLabels[key]?.single || 'mục';
+
+                if (! input) {
+                    return;
+                }
+
+                const shouldDelete = input.disabled;
+                setHomeRepeaterDeleteState(button, shouldDelete);
+                notifyFrom(
+                    button,
+                    shouldDelete ? 'warning' : 'info',
+                    shouldDelete ? `Đã chọn xóa ${label}` : `Đã hủy xóa ${label}`,
+                    shouldDelete ? `${label} này sẽ bị xóa khi bạn bấm Lưu nội dung.` : `${label} này sẽ được giữ lại khi lưu.`
+                );
+            };
+
+            const addHomeRepeaterItem = (button) => {
+                const key = button.dataset.addHomeRepeater;
+                const root = button.closest('[data-site-content-form]') || document.querySelector('[data-site-content-form]');
+                const templateEl = root?.querySelector(`[data-blank-home-repeater-template="${key}"]`);
+                const listEl = root?.querySelector(`[data-home-repeater-list="${key}"]`);
+                const template = templateEl?.innerHTML || '';
+                const label = homeRepeaterLabels[key]?.single || 'mục';
+
+                if (! root || ! templateEl || ! listEl || ! template.trim()) {
+                    notifyFrom(button, 'error', 'Chưa thêm được nội dung', 'Không tìm thấy mẫu nội dung mới.');
+                    return;
+                }
+
+                const index = nextHomeRepeaterIndex(root, key);
+                const number = listEl.querySelectorAll(`[data-home-repeater-item="${key}"]`).length + 1;
+                const wrapper = document.createElement('div');
+
+                wrapper.innerHTML = template
+                    .replaceAll('__INDEX__', String(index))
+                    .replaceAll('__NUMBER__', String(number))
+                    .trim();
+
+                const node = wrapper.firstElementChild;
+
+                if (! node) {
+                    notifyFrom(button, 'error', 'Chưa thêm được nội dung', 'Mẫu nội dung mới không hợp lệ.');
+                    return;
+                }
+
+                listEl.querySelector(`[data-home-repeater-empty="${key}"]`)?.remove();
+                listEl.appendChild(node);
+
+                notifyFrom(button, 'success', `Đã thêm ${label} mới`, `${label} ${number} đã được thêm. Bấm Lưu nội dung để lưu lại.`);
+            };
+
             const setDeleteState = (button, shouldDelete) => {
                 const plan = button.closest('[data-pricing-plan]');
                 const input = plan?.querySelector('[data-plan-delete-input]');
@@ -1111,6 +1218,16 @@
                     return;
                 }
 
+                const homeRepeaterDeleteButton = target.closest('[data-toggle-home-repeater-delete]');
+
+                if (homeRepeaterDeleteButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    toggleHomeRepeaterDelete(homeRepeaterDeleteButton);
+                    return;
+                }
+
                 const addButton = target.closest('[data-add-pricing-plan]');
 
                 if (addButton) {
@@ -1118,6 +1235,16 @@
                     event.stopPropagation();
                     event.stopImmediatePropagation();
                     addPricingPlan(addButton);
+                    return;
+                }
+
+                const homeRepeaterAddButton = target.closest('[data-add-home-repeater]');
+
+                if (homeRepeaterAddButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    addHomeRepeaterItem(homeRepeaterAddButton);
                     return;
                 }
 
@@ -1222,50 +1349,363 @@
                 </div>
             </x-ui.card>
 
-            <x-ui.card title="4 ô giới thiệu" description="Có thể điền thêm ô trống; hàng trống sẽ không hiển thị.">
-                <div class="grid gap-4 md:grid-cols-2">
-                    @foreach ($padRows($activeSettings['services'] ?? [], 6, ['title' => '', 'desc' => '']) as $index => $row)
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <p class="mb-3 text-sm font-bold text-slate-500">Ô {{ $index + 1 }}</p>
-                            <div class="grid gap-3">
+            <x-ui.card title="Ô giới thiệu" description="Có thể thêm, sửa hoặc xóa tùy số lượng cần hiển thị ngoài trang.">
+                <x-slot:actions>
+                    <button
+                        type="button"
+                        class="ui-focus inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 transition hover:bg-amber-100"
+                        data-add-home-repeater="services"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        Thêm ô
+                    </button>
+                </x-slot:actions>
+
+                <div class="grid gap-3" data-home-repeater-list="services">
+                    @forelse (array_values($activeSettings['services'] ?? []) as $index => $row)
+                        @php
+                            $serviceTitle = trim((string) ($row['title'] ?? ''));
+                            $serviceDesc = trim((string) ($row['desc'] ?? ''));
+                        @endphp
+
+                        <details
+                            class="group overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition"
+                            data-home-service="{{ $index }}"
+                            data-home-repeater-item="services"
+                            data-home-index="{{ $index }}"
+                        >
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-amber-50/60 [&::-webkit-details-marker]:hidden">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-slate-500">Ô {{ $index + 1 }}</p>
+                                    @if ($serviceTitle !== '')
+                                        <h3 class="truncate text-lg font-extrabold text-slate-950">{{ $serviceTitle }}</h3>
+                                    @else
+                                        <h3 class="truncate text-lg font-extrabold text-slate-400">Chưa nhập tiêu đề</h3>
+                                    @endif
+                                    @if ($serviceDesc !== '')
+                                        <p class="mt-1 line-clamp-1 text-sm font-medium text-slate-500">{{ $serviceDesc }}</p>
+                                    @else
+                                        <p class="mt-1 text-sm font-medium text-slate-400">Chưa có mô tả.</p>
+                                    @endif
+                                </div>
+
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700 transition group-open:rotate-180">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            </summary>
+
+                            <div class="grid gap-3 border-t border-slate-200 p-4">
+                                <input
+                                    type="hidden"
+                                    name="services[{{ $index }}][delete]"
+                                    value="1"
+                                    disabled
+                                    data-home-repeater-delete-input
+                                >
+                                <div class="flex justify-end">
+                                    <button
+                                        type="button"
+                                        class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                                        data-toggle-home-repeater-delete
+                                        aria-pressed="false"
+                                    >
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                        </svg>
+                                        Xóa ô này
+                                    </button>
+                                </div>
+                                <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Ô này đang được chọn xóa khi lưu.</p>
                                 <x-ui.input name="services[{{ $index }}][title]" label="Tiêu đề" :value="$row['title'] ?? ''" />
                                 <x-ui.textarea name="services[{{ $index }}][desc]" label="Mô tả" :value="$row['desc'] ?? ''" rows="3" />
                             </div>
+                        </details>
+                    @empty
+                        <div class="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-sm font-semibold text-slate-500" data-home-repeater-empty="services">
+                            Chưa có ô giới thiệu nào. Bấm “Thêm ô” để tạo nội dung đầu tiên.
                         </div>
-                    @endforeach
+                    @endforelse
                 </div>
+
+                <template data-blank-home-repeater-template="services">
+                    <details
+                        class="group overflow-hidden rounded-xl border border-amber-200 bg-amber-50/30 shadow-sm transition"
+                        data-home-service="__INDEX__"
+                        data-home-repeater-item="services"
+                        data-home-index="__INDEX__"
+                        open
+                    >
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-amber-50/60 [&::-webkit-details-marker]:hidden">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-bold text-slate-500">Ô __NUMBER__</p>
+                                <h3 class="truncate text-lg font-extrabold text-slate-400">Chưa nhập tiêu đề</h3>
+                                <p class="mt-1 text-sm font-medium text-slate-400">Chưa có mô tả.</p>
+                            </div>
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700 transition group-open:rotate-180">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </summary>
+                        <div class="grid gap-3 border-t border-slate-200 p-4">
+                            <input type="hidden" name="services[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input>
+                            <div class="flex justify-end">
+                                <button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                                    Xóa ô này
+                                </button>
+                            </div>
+                            <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Ô này đang được chọn xóa khi lưu.</p>
+                            <x-ui.input name="services[__INDEX__][title]" label="Tiêu đề" />
+                            <x-ui.textarea name="services[__INDEX__][desc]" label="Mô tả" rows="3" />
+                        </div>
+                    </details>
+                </template>
             </x-ui.card>
 
             <x-ui.card title="Quy trình hỗ trợ">
+                <x-slot:actions>
+                    <button
+                        type="button"
+                        class="ui-focus inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 transition hover:bg-amber-100"
+                        data-add-home-repeater="process_steps"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        Thêm bước
+                    </button>
+                </x-slot:actions>
+
                 <div class="grid gap-5">
                     <x-ui.input name="process_intro" label="Dòng nội dung dưới pill Quy trình hỗ trợ" :value="$activeSettings['process_intro'] ?? ''" required />
+                    <x-ui.input
+                        name="youtube_embed_url"
+                        type="url"
+                        label="Link video YouTube"
+                        :value="$activeSettings['youtube_embed_url'] ?? ''"
+                        helper="Có thể dán link YouTube thường, hệ thống sẽ tự đổi sang link nhúng."
+                    />
 
-                    <div class="grid gap-4 lg:grid-cols-3">
-                        @foreach ($padRows($activeSettings['process_steps'] ?? [], 6, ['title' => '', 'desc' => '']) as $index => $row)
-                            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                                <p class="mb-3 text-sm font-bold text-slate-500">Bước {{ $index + 1 }}</p>
-                                <div class="grid gap-3">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4" data-file-upload>
+                        <div class="grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
+                            <div>
+                                <p class="ui-label">Thumbnail video hiện tại</p>
+                                <div class="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                                    <img
+                                        src="{{ ! empty($activeSettings['video_thumbnail'] ?? '') ? asset('storage/' . ltrim((string) $activeSettings['video_thumbnail'], '/')) : asset('images/home-video-thumbnail.png') }}"
+                                        alt="Thumbnail video hiện tại"
+                                        class="aspect-video w-full object-cover"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="grid content-start gap-3">
+                                <label class="ui-label" for="video-thumbnail">Upload thumbnail video</label>
+                                <input
+                                    id="video-thumbnail"
+                                    type="file"
+                                    name="video_thumbnail"
+                                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                                    class="ui-control h-14 p-0 leading-[3.5rem] text-slate-600 file:mr-4 file:h-14 file:border-0 file:bg-amber-400 file:px-4 file:py-0 file:text-sm file:font-semibold file:leading-[3.5rem] file:text-slate-950 hover:file:bg-amber-300"
+                                    x-on:change="handleFileChoice($event, 'Thumbnail video mới sẽ được lưu khi bấm Lưu nội dung.')"
+                                >
+                                <p class="ui-helper">JPG, PNG hoặc WEBP. Nếu để trống, ảnh hiện tại sẽ được giữ nguyên.</p>
+                                <div class="mt-1" data-upload-preview></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-3" data-home-repeater-list="process_steps">
+                        @forelse (array_values($activeSettings['process_steps'] ?? []) as $index => $row)
+                            @php
+                                $stepTitle = trim((string) ($row['title'] ?? ''));
+                                $stepDesc = trim((string) ($row['desc'] ?? ''));
+                            @endphp
+
+                            <details
+                                class="group overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition"
+                                data-home-process-step="{{ $index }}"
+                                data-home-repeater-item="process_steps"
+                                data-home-index="{{ $index }}"
+                            >
+                                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-amber-50/60 [&::-webkit-details-marker]:hidden">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold text-slate-500">Bước {{ $index + 1 }}</p>
+                                        @if ($stepTitle !== '')
+                                            <h3 class="mt-1 truncate text-lg font-extrabold text-slate-950">{{ $stepTitle }}</h3>
+                                        @else
+                                            <h3 class="mt-1 text-lg font-extrabold text-slate-400">Chưa nhập tiêu đề</h3>
+                                        @endif
+                                        @if ($stepDesc !== '')
+                                            <p class="mt-1 line-clamp-1 text-sm font-medium text-slate-500">{{ $stepDesc }}</p>
+                                        @else
+                                            <p class="mt-1 text-sm font-medium text-slate-400">Chưa có mô tả.</p>
+                                        @endif
+                                    </div>
+
+                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700 transition group-open:rotate-180">
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                </summary>
+
+                                <div class="grid gap-3 border-t border-slate-200 p-4">
+                                    <input
+                                        type="hidden"
+                                        name="process_steps[{{ $index }}][delete]"
+                                        value="1"
+                                        disabled
+                                        data-home-repeater-delete-input
+                                    >
+                                    <div class="flex justify-end">
+                                        <button
+                                            type="button"
+                                            class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                                            data-toggle-home-repeater-delete
+                                            aria-pressed="false"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                            </svg>
+                                            Xóa bước này
+                                        </button>
+                                    </div>
+                                    <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Bước này đang được chọn xóa khi lưu.</p>
                                     <x-ui.input name="process_steps[{{ $index }}][title]" label="Tiêu đề" :value="$row['title'] ?? ''" />
                                     <x-ui.textarea name="process_steps[{{ $index }}][desc]" label="Mô tả" :value="$row['desc'] ?? ''" rows="3" />
                                 </div>
+                            </details>
+                        @empty
+                            <div class="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-sm font-semibold text-slate-500" data-home-repeater-empty="process_steps">
+                                Chưa có bước nào. Bấm “Thêm bước” để tạo bước đầu tiên.
                             </div>
-                        @endforeach
+                        @endforelse
                     </div>
                 </div>
+
+                <template data-blank-home-repeater-template="process_steps">
+                    <details
+                        class="group overflow-hidden rounded-xl border border-amber-200 bg-amber-50/30 shadow-sm transition"
+                        data-home-process-step="__INDEX__"
+                        data-home-repeater-item="process_steps"
+                        data-home-index="__INDEX__"
+                        open
+                    >
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-amber-50/60 [&::-webkit-details-marker]:hidden">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-bold text-slate-500">Bước __NUMBER__</p>
+                                <h3 class="mt-1 text-lg font-extrabold text-slate-400">Chưa nhập tiêu đề</h3>
+                                <p class="mt-1 text-sm font-medium text-slate-400">Chưa có mô tả.</p>
+                            </div>
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700 transition group-open:rotate-180">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </summary>
+                        <div class="grid gap-3 border-t border-slate-200 p-4">
+                            <input type="hidden" name="process_steps[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input>
+                            <div class="flex justify-end">
+                                <button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                                    Xóa bước này
+                                </button>
+                            </div>
+                            <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Bước này đang được chọn xóa khi lưu.</p>
+                            <x-ui.input name="process_steps[__INDEX__][title]" label="Tiêu đề" />
+                            <x-ui.textarea name="process_steps[__INDEX__][desc]" label="Mô tả" rows="3" />
+                        </div>
+                    </details>
+                </template>
             </x-ui.card>
 
             <x-ui.card title="Thống kê và CTA cuối trang">
+                <x-slot:actions>
+                    <button
+                        type="button"
+                        class="ui-focus inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 transition hover:bg-amber-100"
+                        data-add-home-repeater="stats"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        Thêm thống kê
+                    </button>
+                </x-slot:actions>
+
                 <div class="grid gap-5">
-                    <div class="grid gap-4 md:grid-cols-3">
-                        @foreach ($padRows($activeSettings['stats'] ?? [], 4, ['value' => '', 'label' => '']) as $index => $row)
-                            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                                <p class="mb-3 text-sm font-bold text-slate-500">Thống kê {{ $index + 1 }}</p>
-                                <div class="grid gap-3">
+                    <div class="grid gap-3" data-home-repeater-list="stats">
+                        @forelse (array_values($activeSettings['stats'] ?? []) as $index => $row)
+                            @php
+                                $statValue = trim((string) ($row['value'] ?? ''));
+                                $statLabel = trim((string) ($row['label'] ?? ''));
+                            @endphp
+
+                            <details
+                                class="group overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition"
+                                data-home-stat="{{ $index }}"
+                                data-home-repeater-item="stats"
+                                data-home-index="{{ $index }}"
+                            >
+                                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-amber-50/60 [&::-webkit-details-marker]:hidden">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold text-slate-500">Thống kê {{ $index + 1 }}</p>
+                                        @if ($statValue !== '')
+                                            <h3 class="mt-1 truncate text-lg font-extrabold text-slate-950">{{ $statValue }}</h3>
+                                        @else
+                                            <h3 class="mt-1 text-lg font-extrabold text-slate-400">Chưa nhập số liệu</h3>
+                                        @endif
+                                        @if ($statLabel !== '')
+                                            <p class="mt-1 line-clamp-1 text-sm font-medium text-slate-500">{{ $statLabel }}</p>
+                                        @else
+                                            <p class="mt-1 text-sm font-medium text-slate-400">Chưa có nhãn.</p>
+                                        @endif
+                                    </div>
+
+                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700 transition group-open:rotate-180">
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                </summary>
+
+                                <div class="grid gap-3 border-t border-slate-200 p-4 md:grid-cols-2">
+                                    <input
+                                        type="hidden"
+                                        name="stats[{{ $index }}][delete]"
+                                        value="1"
+                                        disabled
+                                        data-home-repeater-delete-input
+                                    >
+                                    <div class="flex justify-end md:col-span-2">
+                                        <button
+                                            type="button"
+                                            class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                                            data-toggle-home-repeater-delete
+                                            aria-pressed="false"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                            </svg>
+                                            Xóa thống kê này
+                                        </button>
+                                    </div>
+                                    <p class="hidden text-sm font-semibold text-red-600 md:col-span-2" data-home-repeater-delete-message>Thống kê này đang được chọn xóa khi lưu.</p>
                                     <x-ui.input name="stats[{{ $index }}][value]" label="Số liệu" :value="$row['value'] ?? ''" />
                                     <x-ui.input name="stats[{{ $index }}][label]" label="Nhãn" :value="$row['label'] ?? ''" />
                                 </div>
+                            </details>
+                        @empty
+                            <div class="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center text-sm font-semibold text-slate-500" data-home-repeater-empty="stats">
+                                Chưa có thống kê nào. Bấm “Thêm thống kê” để tạo mục đầu tiên.
                             </div>
-                        @endforeach
+                        @endforelse
                     </div>
 
                     <div class="grid gap-5 lg:grid-cols-2">
@@ -1273,6 +1713,41 @@
                         <x-ui.textarea name="cta_copy" label="Mô tả CTA" :value="$activeSettings['cta_copy'] ?? ''" required rows="3" />
                     </div>
                 </div>
+
+                <template data-blank-home-repeater-template="stats">
+                    <details
+                        class="group overflow-hidden rounded-xl border border-amber-200 bg-amber-50/30 shadow-sm transition"
+                        data-home-stat="__INDEX__"
+                        data-home-repeater-item="stats"
+                        data-home-index="__INDEX__"
+                        open
+                    >
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-amber-50/60 [&::-webkit-details-marker]:hidden">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-bold text-slate-500">Thống kê __NUMBER__</p>
+                                <h3 class="mt-1 text-lg font-extrabold text-slate-400">Chưa nhập số liệu</h3>
+                                <p class="mt-1 text-sm font-medium text-slate-400">Chưa có nhãn.</p>
+                            </div>
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700 transition group-open:rotate-180">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </summary>
+                        <div class="grid gap-3 border-t border-slate-200 p-4 md:grid-cols-2">
+                            <input type="hidden" name="stats[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input>
+                            <div class="flex justify-end md:col-span-2">
+                                <button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                                    Xóa thống kê này
+                                </button>
+                            </div>
+                            <p class="hidden text-sm font-semibold text-red-600 md:col-span-2" data-home-repeater-delete-message>Thống kê này đang được chọn xóa khi lưu.</p>
+                            <x-ui.input name="stats[__INDEX__][value]" label="Số liệu" />
+                            <x-ui.input name="stats[__INDEX__][label]" label="Nhãn" />
+                        </div>
+                    </details>
+                </template>
             </x-ui.card>
         @endif
 
@@ -1394,7 +1869,6 @@
                             <div class="grid items-start gap-5 border-t border-slate-200 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
                                 <div class="grid content-start gap-4 self-start">
                                     <x-ui.input name="plans[{{ $index }}][name]" label="Tên gói" :value="$row['name'] ?? ''" />
-                                    <x-ui.input name="plans[{{ $index }}][price]" label="Giá hiển thị" :value="$row['price'] ?? ''" placeholder="Ví dụ: Liên hệ" />
                                     <x-ui.textarea name="plans[{{ $index }}][desc]" label="Mô tả" :value="$row['desc'] ?? ''" rows="3" />
                                     <x-ui.textarea name="plans[{{ $index }}][features_text]" label="Tính năng" :value="implode(PHP_EOL, $row['features'] ?? [])" rows="4" />
                                 </div>
@@ -1630,11 +2104,6 @@
                                 </div>
 
                                 <div>
-                                    <label class="ui-label" for="plans-__INDEX__-price">Giá hiển thị</label>
-                                    <input id="plans-__INDEX__-price" name="plans[__INDEX__][price]" type="text" value="Liên hệ" class="ui-control" placeholder="Ví dụ: Liên hệ">
-                                </div>
-
-                                <div>
                                     <label class="ui-label" for="plans-__INDEX__-desc">Mô tả</label>
                                     <textarea id="plans-__INDEX__-desc" name="plans[__INDEX__][desc]" rows="3" class="ui-control"></textarea>
                                 </div>
@@ -1667,18 +2136,6 @@
                 </template>
             </x-ui.card>
 
-            <x-ui.card title="Ghi chú báo giá">
-                <div class="grid gap-5 lg:grid-cols-2">
-                    <x-ui.input name="notes_title" label="Tiêu đề ghi chú" :value="$activeSettings['notes_title'] ?? ''" required />
-                    <x-ui.textarea name="notes_copy" label="Mô tả ghi chú" :value="$activeSettings['notes_copy'] ?? ''" required rows="3" />
-                </div>
-
-                <div class="mt-5 grid gap-4 md:grid-cols-2">
-                    @foreach ($padTextRows($activeSettings['notes'] ?? [], 6) as $index => $note)
-                        <x-ui.textarea name="notes[{{ $index }}][text]" label="Ghi chú {{ $index + 1 }}" :value="$note" rows="3" />
-                    @endforeach
-                </div>
-            </x-ui.card>
         @endif
 
         @if ($activeTab === 'contact')
@@ -1710,41 +2167,21 @@
                     <x-ui.textarea name="form_copy" label="Mô tả cạnh form" :value="$activeSettings['form_copy'] ?? ''" required rows="3" />
                 </div>
 
-                <div class="mt-5 grid gap-4 md:grid-cols-2">
-                    @foreach ($padRows($activeSettings['qr_cards'] ?? [], 3, ['label' => '', 'image' => '', 'alt' => '']) as $index => $row)
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <p class="mb-3 text-sm font-bold text-slate-500">QR {{ $index + 1 }}</p>
-                            <div class="grid gap-3">
-                                <x-ui.input name="qr_cards[{{ $index }}][label]" label="Nhãn" :value="$row['label'] ?? ''" />
-                                <x-ui.input name="qr_cards[{{ $index }}][image]" label="Đường dẫn ảnh trong public" :value="$row['image'] ?? ''" helper="Ví dụ: images/zalo-qr-business-support.jpg" />
-                                <x-ui.input name="qr_cards[{{ $index }}][alt]" label="Alt ảnh" :value="$row['alt'] ?? ''" />
-                            </div>
-                        </div>
-                    @endforeach
+                <div class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <p class="mb-3 text-sm font-bold text-slate-500">QR Zalo</p>
+                    <div class="grid gap-3 md:grid-cols-2">
+                        <x-ui.input name="qr_card[label]" label="Nhãn QR" :value="$contactQrCard['label'] ?? ''" />
+                        <x-ui.input
+                            name="qr_card[url]"
+                            type="url"
+                            label="Link Zalo để tạo QR"
+                            :value="$contactQrCard['url'] ?? ''"
+                            helper="Ví dụ: https://zalo.me/0900000000"
+                        />
+                    </div>
                 </div>
             </x-ui.card>
 
-            <x-ui.card title="Thông tin công ty và ngân hàng">
-                <div class="grid gap-5 lg:grid-cols-2">
-                    <x-ui.input name="company_name" label="Tên công ty" :value="$activeSettings['company_name'] ?? ''" required />
-                    <x-ui.input name="phone" label="Số điện thoại" :value="$activeSettings['phone'] ?? ''" required />
-                    <x-ui.input name="email" label="Email" type="email" :value="$activeSettings['email'] ?? ''" required />
-                    <x-ui.textarea name="address" label="Địa chỉ" :value="$activeSettings['address'] ?? ''" required rows="3" />
-                </div>
-
-                <div class="mt-5 grid gap-4 md:grid-cols-2">
-                    @foreach ($padRows($activeSettings['bank_accounts'] ?? [], 4, ['bank' => '', 'account' => '', 'owner' => '']) as $index => $row)
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <p class="mb-3 text-sm font-bold text-slate-500">Tài khoản {{ $index + 1 }}</p>
-                            <div class="grid gap-3">
-                                <x-ui.input name="bank_accounts[{{ $index }}][bank]" label="Ngân hàng" :value="$row['bank'] ?? ''" />
-                                <x-ui.input name="bank_accounts[{{ $index }}][account]" label="Số tài khoản" :value="$row['account'] ?? ''" />
-                                <x-ui.input name="bank_accounts[{{ $index }}][owner]" label="Chủ tài khoản" :value="$row['owner'] ?? ''" />
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </x-ui.card>
         @endif
 
         @if ($activeTab === 'software')
@@ -1955,8 +2392,8 @@
                                 </div>
 
                                 <div class="min-w-0">
-                                    <p class="text-sm font-bold text-slate-500">Danh mục __CATEGORY_NUMBER__</p>
-                                    <h3 class="mt-1 truncate text-lg font-extrabold text-slate-950">Danh mục __CATEGORY_NUMBER__</h3>
+                                    <p class="text-sm font-bold text-slate-500">Danh mục mới</p>
+                                    <h3 class="mt-1 truncate text-lg font-extrabold text-slate-950">Chưa nhập tên danh mục</h3>
                                     <p class="mt-1 text-sm font-medium text-slate-500">0 phần mềm</p>
                                     <p class="mt-2 hidden text-sm font-semibold text-red-600" data-software-category-delete-message>Danh mục này và các phần mềm bên trong đang được chọn xóa khi lưu.</p>
                                 </div>
@@ -1973,7 +2410,7 @@
                             <div class="grid gap-3 md:grid-cols-2">
                                 <div>
                                     <label class="ui-label" for="categories-__CATEGORY_INDEX__-name">Tên danh mục</label>
-                                    <input id="categories-__CATEGORY_INDEX__-name" name="categories[__CATEGORY_INDEX__][name]" type="text" value="Danh mục __CATEGORY_NUMBER__" class="ui-control">
+                                    <input id="categories-__CATEGORY_INDEX__-name" name="categories[__CATEGORY_INDEX__][name]" type="text" class="ui-control">
                                 </div>
                                 <div>
                                     <label class="ui-label" for="categories-__CATEGORY_INDEX__-desc">Mô tả ngắn</label>
@@ -2036,8 +2473,8 @@
                                 </div>
 
                                 <div class="min-w-0">
-                                    <p class="text-sm font-bold text-slate-500">Phần mềm __NUMBER__</p>
-                                    <h3 class="mt-1 truncate text-lg font-extrabold text-slate-950">Phần mềm __NUMBER__</h3>
+                                    <p class="text-sm font-bold text-slate-500">Phần mềm mới</p>
+                                    <h3 class="mt-1 truncate text-lg font-extrabold text-slate-950">Chưa nhập tên phần mềm</h3>
                                     <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium text-slate-500">
                                         <span>Chưa có loại link</span>
                                         <span class="max-w-full truncate">Chưa có URL</span>
@@ -2056,7 +2493,7 @@
                         <div class="grid gap-3 border-t border-slate-200 p-4 md:grid-cols-2">
                             <div>
                                 <label class="ui-label" for="items-__CATEGORY_INDEX__-__INDEX__-name">Tên phần mềm</label>
-                                <input id="items-__CATEGORY_INDEX__-__INDEX__-name" name="categories[__CATEGORY_INDEX__][items][__INDEX__][name]" type="text" value="Phần mềm __NUMBER__" class="ui-control">
+                                <input id="items-__CATEGORY_INDEX__-__INDEX__-name" name="categories[__CATEGORY_INDEX__][items][__INDEX__][name]" type="text" class="ui-control">
                             </div>
                             <div>
                                 <label class="ui-label" for="items-__CATEGORY_INDEX__-__INDEX__-type">Loại link</label>
@@ -2075,18 +2512,6 @@
                 </template>
             </x-ui.card>
 
-            <x-ui.card title="Hỗ trợ cài đặt">
-                <div class="grid gap-5 lg:grid-cols-2">
-                    <x-ui.input name="support_title" label="Tiêu đề" :value="$activeSettings['support_title'] ?? ''" required />
-                    <x-ui.textarea name="support_copy" label="Mô tả" :value="$activeSettings['support_copy'] ?? ''" required rows="3" />
-                </div>
-
-                <div class="mt-5 grid gap-4 md:grid-cols-2">
-                    @foreach ($padTextRows($activeSettings['checklist'] ?? [], 6) as $index => $item)
-                        <x-ui.input name="checklist[{{ $index }}][text]" label="Thông tin cần chuẩn bị {{ $index + 1 }}" :value="$item" />
-                    @endforeach
-                </div>
-            </x-ui.card>
         @endif
 
         <div class="sticky bottom-4 z-10 ml-auto flex w-fit justify-end rounded-2xl border border-amber-100 bg-white/95 p-2 shadow-[0_18px_45px_rgba(15,23,42,0.14)] backdrop-blur">

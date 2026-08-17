@@ -54,14 +54,28 @@ class PageController extends Controller
 
     public function services(): View
     {
-        return view('frontend.services.index');
+        $homeContent = SiteSetting::valueFor('home');
+        $services = collect($homeContent['services'] ?? [])
+            ->filter(fn (array $service): bool => trim((string) ($service['title'] ?? '')) !== '' || trim((string) ($service['desc'] ?? '')) !== '')
+            ->values()
+            ->map(fn (array $service, int $index): array => [
+                'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
+                'title' => trim((string) ($service['title'] ?? '')),
+                'description' => trim((string) ($service['desc'] ?? '')),
+            ])
+            ->all();
+        $steps = collect($homeContent['process_steps'] ?? [])
+            ->filter(fn (array $step): bool => trim((string) ($step['title'] ?? '')) !== '' || trim((string) ($step['desc'] ?? '')) !== '')
+            ->values()
+            ->all();
+
+        return view('frontend.services.index', compact('homeContent', 'services', 'steps'));
     }
 
     public function pricing(): View
     {
         $pricingContent = SiteSetting::valueFor('pricing');
         $pricingPlans = $pricingContent['plans'] ?? [];
-        $notes = $pricingContent['notes'] ?? [];
         $pricingCategories = PricingCategory::query()
             ->active()
             ->ordered()
@@ -75,7 +89,6 @@ class PageController extends Controller
             ]);
 
         return view('frontend.pricing', compact(
-            'notes',
             'pricingCategories',
             'pricingContent',
             'pricingPlans'
@@ -103,9 +116,8 @@ class PageController extends Controller
             ->flatMap(fn (array $category): array => $category['items'] ?? [])
             ->values()
             ->all();
-        $softwareChecklist = $softwareContent['checklist'] ?? [];
 
-        return view('frontend.software', compact('softwareCategories', 'softwareChecklist', 'softwareContent', 'softwareItems'));
+        return view('frontend.software', compact('softwareCategories', 'softwareContent', 'softwareItems'));
     }
 
     private function softwareCategories(array $softwareContent): array
@@ -114,7 +126,7 @@ class PageController extends Controller
 
         if ($categories === [] && ! empty($softwareContent['items'] ?? [])) {
             $categories = [[
-                'name' => 'Phần mềm chung',
+                'name' => '',
                 'desc' => '',
                 'items' => array_values($softwareContent['items'] ?? []),
             ]];
@@ -138,9 +150,17 @@ class PageController extends Controller
     {
         $contactContent = SiteSetting::valueFor('contact');
         $contacts = $contactContent['cards'] ?? [];
-        $bankAccounts = $contactContent['bank_accounts'] ?? [];
-        $qrCards = $contactContent['qr_cards'] ?? [];
+        $qrCard = $contactContent['qr_card'] ?? [];
 
-        return view('frontend.contact', compact('bankAccounts', 'contactContent', 'contacts', 'qrCards'));
+        if (! is_array($qrCard)) {
+            $qrCard = [];
+        }
+
+        $qrCard = [
+            'label' => trim((string) ($qrCard['label'] ?? '')),
+            'url' => trim((string) ($qrCard['url'] ?? '')),
+        ];
+
+        return view('frontend.contact', compact('contactContent', 'contacts', 'qrCard'));
     }
 }

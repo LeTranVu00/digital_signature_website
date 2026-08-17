@@ -36,9 +36,6 @@
                             x-bind:aria-selected="(activeCategory === {{ $categoryIndex }}).toString()"
                         >
                             <span>{{ $category['name'] ?: 'Danh mục ' . ($categoryIndex + 1) }}</span>
-                            <span class="rounded-full px-2 py-0.5 text-xs" x-bind:class="activeCategory === {{ $categoryIndex }} ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500'">
-                                {{ count($category['items'] ?? []) }}
-                            </span>
                         </button>
                     @empty
                         <div class="px-3 py-2 text-sm font-semibold text-slate-500">Chưa có danh mục phần mềm.</div>
@@ -92,27 +89,4 @@
         </div>
     </section>
 
-    <section class="site-section-warm" data-scroll-section="Hỗ trợ cài đặt">
-        <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_0.8fr] lg:px-8">
-            <div data-reveal="fade-right">
-                <h2 class="site-section-title">
-                    {{ $softwareContent['support_title'] }}
-                </h2>
-                <p class="mt-5 site-section-copy">
-                    {{ $softwareContent['support_copy'] }}
-                </p>
-            </div>
-            <div class="site-feature-card" data-reveal="fade-left">
-                <h3 class="text-2xl font-extrabold text-slate-950">Thông tin nên chuẩn bị</h3>
-                <ul class="mt-5 grid gap-3 text-base font-medium leading-7 text-slate-700">
-                    @foreach ($softwareChecklist as $item)
-                        <li>{{ $item }}</li>
-                    @endforeach
-                </ul>
-                <x-ui.button :href="route('contact')" class="mt-6">
-                    Liên hệ hỗ trợ
-                </x-ui.button>
-            </div>
-        </div>
-    </section>
 @endsection

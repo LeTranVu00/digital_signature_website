@@ -70,21 +70,39 @@ class SiteContentController extends Controller
             'hero_copy' => ['required', 'string', 'max:1000'],
             'intro_text' => ['required', 'string', 'max:1200'],
             'services' => ['nullable', 'array'],
+            'services.*.delete' => ['nullable'],
             'services.*.title' => ['nullable', 'string', 'max:120'],
             'services.*.desc' => ['nullable', 'string', 'max:500'],
             'process_intro' => ['required', 'string', 'max:255'],
+            'youtube_embed_url' => ['nullable', 'url', 'max:500', $this->httpUrlRule()],
+            'video_thumbnail' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'process_steps' => ['nullable', 'array'],
+            'process_steps.*.delete' => ['nullable'],
             'process_steps.*.title' => ['nullable', 'string', 'max:120'],
             'process_steps.*.desc' => ['nullable', 'string', 'max:500'],
             'stats' => ['nullable', 'array'],
+            'stats.*.delete' => ['nullable'],
             'stats.*.value' => ['nullable', 'string', 'max:40'],
             'stats.*.label' => ['nullable', 'string', 'max:120'],
             'cta_title' => ['required', 'string', 'max:255'],
             'cta_copy' => ['required', 'string', 'max:800'],
         ]);
 
+        $stored = SiteSetting::valueFor('home');
+        $videoThumbnail = (string) ($stored['video_thumbnail'] ?? '');
+
+        if ($request->hasFile('video_thumbnail')) {
+            if ($videoThumbnail !== '') {
+                Storage::disk('public')->delete($videoThumbnail);
+            }
+
+            $videoThumbnail = $request->file('video_thumbnail')->store('home', 'public');
+        }
+
         return [
             ...$validated,
+            'youtube_embed_url' => $this->youtubeEmbedUrl($validated['youtube_embed_url'] ?? ''),
+            'video_thumbnail' => $videoThumbnail,
             'services' => $this->rows($validated['services'] ?? [], ['title', 'desc']),
             'process_steps' => $this->rows($validated['process_steps'] ?? [], ['title', 'desc']),
             'stats' => $this->rows($validated['stats'] ?? [], ['value', 'label']),
@@ -99,7 +117,6 @@ class SiteContentController extends Controller
             'plans' => ['nullable', 'array'],
             'plans.*.delete' => ['nullable'],
             'plans.*.name' => ['nullable', 'string', 'max:160'],
-            'plans.*.price' => ['nullable', 'string', 'max:80'],
             'plans.*.desc' => ['nullable', 'string', 'max:700'],
             'plans.*.features_text' => ['nullable', 'string', 'max:1000'],
             'plans.*.existing_images' => ['nullable', 'array'],
@@ -114,10 +131,6 @@ class SiteContentController extends Controller
             'plans.*.new_images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'plans.*.new_image_names' => ['nullable', 'array'],
             'plans.*.new_image_names.*' => ['nullable', 'string', 'max:160'],
-            'notes_title' => ['required', 'string', 'max:255'],
-            'notes_copy' => ['required', 'string', 'max:1000'],
-            'notes' => ['nullable', 'array'],
-            'notes.*.text' => ['nullable', 'string', 'max:600'],
         ]);
 
         // Merge incoming plans with stored plans to avoid accidental overwrite
@@ -204,13 +217,12 @@ class SiteContentController extends Controller
 
                 return [
                     'name' => trim((string) ($row['name'] ?? '')),
-                    'price' => trim((string) ($row['price'] ?? '')),
                     'desc' => trim((string) ($row['desc'] ?? '')),
                     'features' => $this->lines($row['features_text'] ?? ''),
                     'images' => $images,
                 ];
             })
-            ->filter(fn (?array $row): bool => is_array($row) && ($this->hasAny($row, ['name', 'price', 'desc']) || count($row['features']) > 0 || count($row['images']) > 0))
+            ->filter(fn (?array $row): bool => is_array($row) && ($this->hasAny($row, ['name', 'desc']) || count($row['features']) > 0 || count($row['images']) > 0))
             ->values()
             ->all();
 
@@ -218,9 +230,6 @@ class SiteContentController extends Controller
             'hero_title' => $validated['hero_title'],
             'hero_copy' => $validated['hero_copy'],
             'plans' => $plans,
-            'notes_title' => $validated['notes_title'],
-            'notes_copy' => $validated['notes_copy'],
-            'notes' => $this->textRows($validated['notes'] ?? []),
         ];
     }
 
@@ -235,25 +244,18 @@ class SiteContentController extends Controller
             'cards.*.desc' => ['nullable', 'string', 'max:500'],
             'form_title' => ['required', 'string', 'max:255'],
             'form_copy' => ['required', 'string', 'max:1000'],
-            'qr_cards' => ['nullable', 'array'],
-            'qr_cards.*.label' => ['nullable', 'string', 'max:160'],
-            'qr_cards.*.image' => ['nullable', 'string', 'max:255'],
-            'qr_cards.*.alt' => ['nullable', 'string', 'max:160'],
-            'company_name' => ['required', 'string', 'max:160'],
-            'address' => ['required', 'string', 'max:500'],
-            'phone' => ['required', 'string', 'max:80'],
-            'email' => ['required', 'email', 'max:160'],
-            'bank_accounts' => ['nullable', 'array'],
-            'bank_accounts.*.bank' => ['nullable', 'string', 'max:160'],
-            'bank_accounts.*.account' => ['nullable', 'string', 'max:120'],
-            'bank_accounts.*.owner' => ['nullable', 'string', 'max:160'],
+            'qr_card' => ['nullable', 'array'],
+            'qr_card.label' => ['nullable', 'string', 'max:160'],
+            'qr_card.url' => ['nullable', 'url', 'max:500', $this->httpUrlRule()],
         ]);
 
         return [
             ...$validated,
             'cards' => $this->rows($validated['cards'] ?? [], ['title', 'value', 'desc']),
-            'qr_cards' => $this->rows($validated['qr_cards'] ?? [], ['label', 'image', 'alt']),
-            'bank_accounts' => $this->rows($validated['bank_accounts'] ?? [], ['bank', 'account', 'owner']),
+            'qr_card' => [
+                'label' => trim((string) ($validated['qr_card']['label'] ?? '')),
+                'url' => trim((string) ($validated['qr_card']['url'] ?? '')),
+            ],
         ];
     }
 
@@ -272,17 +274,13 @@ class SiteContentController extends Controller
             'categories.*.items.*.name' => ['nullable', 'string', 'max:180'],
             'categories.*.items.*.desc' => ['nullable', 'string', 'max:700'],
             'categories.*.items.*.type' => ['nullable', 'string', 'max:120'],
-            'categories.*.items.*.url' => ['nullable', 'url', 'max:500'],
+            'categories.*.items.*.url' => ['nullable', 'url', 'max:500', $this->httpUrlRule()],
             'items' => ['nullable', 'array'],
             'items.*.delete' => ['nullable'],
             'items.*.name' => ['nullable', 'string', 'max:180'],
             'items.*.desc' => ['nullable', 'string', 'max:700'],
             'items.*.type' => ['nullable', 'string', 'max:120'],
-            'items.*.url' => ['nullable', 'url', 'max:500'],
-            'support_title' => ['required', 'string', 'max:255'],
-            'support_copy' => ['required', 'string', 'max:1000'],
-            'checklist' => ['nullable', 'array'],
-            'checklist.*.text' => ['nullable', 'string', 'max:500'],
+            'items.*.url' => ['nullable', 'url', 'max:500', $this->httpUrlRule()],
         ]);
 
         $categories = $this->softwareCategories($validated['categories'] ?? [], $validated['items'] ?? []);
@@ -292,10 +290,11 @@ class SiteContentController extends Controller
             ->all();
 
         return [
-            ...$validated,
+            'hero_title' => $validated['hero_title'],
+            'hero_copy' => $validated['hero_copy'],
+            'notice' => $validated['notice'],
             'categories' => $categories,
             'items' => $items,
-            'checklist' => $this->textRows($validated['checklist'] ?? []),
         ];
     }
 
@@ -303,8 +302,8 @@ class SiteContentController extends Controller
     {
         if ($categories === [] && $legacyItems !== []) {
             $categories = [[
-                'name' => 'Phần mềm chung',
-                'desc' => 'Các phần mềm hỗ trợ đang có.',
+                'name' => '',
+                'desc' => '',
                 'items' => $legacyItems,
             ]];
         }
@@ -341,6 +340,7 @@ class SiteContentController extends Controller
     private function rows(array $rows, array $fields): array
     {
         return collect($rows)
+            ->reject(fn (array $row): bool => filter_var($row['delete'] ?? false, FILTER_VALIDATE_BOOL))
             ->map(function (array $row) use ($fields): array {
                 return collect($fields)
                     ->mapWithKeys(fn (string $field): array => [$field => trim((string) ($row[$field] ?? ''))])
@@ -367,6 +367,47 @@ class SiteContentController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    private function httpUrlRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            $scheme = strtolower((string) parse_url((string) $value, PHP_URL_SCHEME));
+
+            if (! in_array($scheme, ['http', 'https'], true)) {
+                $fail('Duong dan phai su dung http hoac https.');
+            }
+        };
+    }
+
+    private function youtubeEmbedUrl(?string $url): string
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return '';
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+        $query = [];
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        if (str_contains($host, 'youtu.be')) {
+            $videoId = explode('/', $path)[0] ?? '';
+        } elseif (str_contains($host, 'youtube.com') && str_starts_with($path, 'embed/')) {
+            $videoId = explode('/', substr($path, strlen('embed/')))[0] ?? '';
+        } elseif (str_contains($host, 'youtube.com') && str_starts_with($path, 'shorts/')) {
+            $videoId = explode('/', substr($path, strlen('shorts/')))[0] ?? '';
+        } elseif (str_contains($host, 'youtube.com')) {
+            $videoId = (string) ($query['v'] ?? '');
+        } else {
+            return $url;
+        }
+
+        $videoId = preg_replace('/[^A-Za-z0-9_-]/', '', $videoId ?? '');
+
+        return $videoId ? "https://www.youtube.com/embed/{$videoId}" : $url;
     }
 
     private function hasAny(array $row, array $fields): bool

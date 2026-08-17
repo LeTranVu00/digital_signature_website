@@ -67,16 +67,10 @@
                 @auth
                     <x-ui.user-menu :user="auth()->user()" />
                 @else
-                    <a href="{{ route('login') }}"
-                       class="text-sm font-semibold text-slate-700 transition-all hover:text-red-600">
+                    <x-ui.button :href="route('login')" size="sm" class="!rounded-full !bg-red-600 !px-6 !py-2.5 !text-white hover:!bg-red-700">
                         Đăng nhập
-                    </a>
+                    </x-ui.button>
                 @endauth
-
-                <x-ui.button :href="route('contact')" size="sm" class="!rounded-full !bg-red-600 !px-6 !py-2.5 !text-white hover:!bg-red-700">
-                    Gửi yêu cầu
-                </x-ui.button>
-
             </div>
 
             <button
@@ -161,18 +155,10 @@
                             </button>
                         </form>
                     @else
-                        <a
-                            href="{{ route('login') }}"
-                            x-on:click="closeMobileMenu()"
-                            class="rounded-lg px-3 py-2.5 transition hover:bg-red-50 hover:text-red-600"
-                        >
+                        <x-ui.button :href="route('login')" full class="!rounded-full !bg-red-600 !text-white hover:!bg-red-700">
                             Đăng nhập
-                        </a>
+                        </x-ui.button>
                     @endauth
-
-                    <x-ui.button :href="route('contact')" full class="!rounded-full !bg-red-600 !text-white hover:!bg-red-700">
-                        Gửi yêu cầu
-                    </x-ui.button>
                 </div>
             </nav>
         </div>
@@ -184,6 +170,13 @@
     </main>
 
     @unless (trim($__env->yieldContent('hide_footer')))
+        @php
+            $footerContactRows = collect(\App\Models\SiteSetting::valueFor('contact')['cards'] ?? [])
+                ->filter(fn (array $row): bool => trim((string) ($row['title'] ?? '')) !== '' || trim((string) ($row['value'] ?? '')) !== '')
+                ->take(3)
+                ->values();
+        @endphp
+
         <x-ui.scroll-navigator />
 
     <footer class="border-t border-amber-400/20 bg-slate-950 text-white">
@@ -236,22 +229,22 @@
                 </ul>
             </div>
 
-            <div class="md:col-span-2 lg:col-span-5">
-                <div class="grid gap-4 rounded-lg border border-amber-400/20 bg-white/[0.06] p-4 text-sm text-zinc-200 sm:grid-cols-3">
-                    <div>
-                        <span class="block text-xs font-semibold uppercase text-zinc-300/80">Hotline</span>
-                        <span class="mt-1 block text-white">0900 000 000</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-semibold uppercase text-zinc-300/80">Email</span>
-                        <span class="mt-1 block text-white">support@example.com</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-semibold uppercase text-zinc-300/80">Thời gian</span>
-                        <span class="mt-1 block text-white">8:00 - 17:30, Thứ 2 - Thứ 6</span>
+            @if ($footerContactRows->isNotEmpty())
+                <div class="md:col-span-2 lg:col-span-5">
+                    <div class="grid gap-4 rounded-lg border border-amber-400/20 bg-white/[0.06] p-4 text-sm text-zinc-200 sm:grid-cols-3">
+                        @foreach ($footerContactRows as $row)
+                            <div>
+                                @if (! empty($row['title']))
+                                    <span class="block text-xs font-semibold uppercase text-zinc-300/80">{{ $row['title'] }}</span>
+                                @endif
+                                @if (! empty($row['value']))
+                                    <span class="mt-1 block text-white [overflow-wrap:anywhere]">{{ $row['value'] }}</span>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-            </div>
+            @endif
 
         </div>
 

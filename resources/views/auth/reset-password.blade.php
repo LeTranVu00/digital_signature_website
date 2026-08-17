@@ -18,7 +18,7 @@
             <x-ui.input
                 type="password"
                 name="password"
-                label="Password"
+                label="Mật khẩu mới"
                 required
                 autocomplete="new-password"
             />
@@ -26,15 +26,15 @@
             <x-ui.input
                 type="password"
                 name="password_confirmation"
-                label="Confirm Password"
+                label="Nhập lại mật khẩu mới"
                 required
                 autocomplete="new-password"
             />
         </div>
 
         <div class="mt-5 flex justify-end">
-            <x-ui.submit-button loading-text="Resetting...">
-                {{ __('Reset Password') }}
+            <x-ui.submit-button loading-text="Đang đặt lại...">
+                Đặt lại mật khẩu
             </x-ui.submit-button>
         </div>
     </form>

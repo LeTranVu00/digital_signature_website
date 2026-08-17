@@ -84,7 +84,7 @@ class SecurityHardeningTest extends TestCase
 
     public function test_register_route_is_rate_limited(): void
     {
-        for ($attempt = 1; $attempt <= 3; $attempt++) {
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
             $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.40'])
                 ->post(route('register'), [
                     'name' => 'Rate User',
@@ -103,5 +103,51 @@ class SecurityHardeningTest extends TestCase
                 'password_confirmation' => 'password',
             ])
             ->assertTooManyRequests();
+    }
+
+    public function test_login_route_allows_only_five_failed_attempts_per_window(): void
+    {
+        $user = User::factory()->create(['email' => 'limited@example.com']);
+
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.43'])
+                ->post(route('login'), [
+                    'email' => $user->email,
+                    'password' => 'wrong-password',
+                ])
+                ->assertSessionHasErrors('email');
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.43'])
+            ->post(route('login'), [
+                'email' => $user->email,
+                'password' => 'wrong-password',
+            ])
+            ->assertTooManyRequests();
+    }
+
+    public function test_oversized_request_payloads_are_rejected(): void
+    {
+        config(['app.debug' => false]);
+
+        $this->withServerVariables([
+            'CONTENT_LENGTH' => '10485761',
+            'REMOTE_ADDR' => '10.20.30.41',
+        ])
+            ->get('/')
+            ->assertStatus(413);
+    }
+
+    public function test_malformed_json_payloads_are_rejected(): void
+    {
+        config(['app.debug' => false]);
+
+        $this->withServerVariables([
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json',
+            'REMOTE_ADDR' => '10.20.30.42',
+        ])
+            ->call('POST', route('contact.store'), [], [], [], [], '{"name":')
+            ->assertStatus(400);
     }
 }

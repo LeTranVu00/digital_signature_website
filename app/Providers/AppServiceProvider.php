@@ -22,12 +22,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('global', function (Request $request) {
+            return Limit::perMinute((int) env('RATE_LIMIT_GLOBAL_PER_MINUTE', 120))
+                ->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('auth', function (Request $request) {
+            return Limit::perMinutes(15, 5)
+                ->by($request->user()?->id ?: $request->ip());
+        });
+
         RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
+            return Limit::perMinutes(15, 5)
+                ->by($request->ip());
         });
 
         RateLimiter::for('register', function (Request $request) {
-            return Limit::perMinute(3)->by($request->ip());
+            return Limit::perMinutes(15, 5)
+                ->by($request->ip());
         });
 
         RateLimiter::for('comments', function (Request $request) {

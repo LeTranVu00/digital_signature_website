@@ -5,6 +5,7 @@
     'error' => null,
     'helper' => null,
     'required' => false,
+    'showRequiredMark' => true,
     'disabled' => false,
 ])
 
@@ -47,7 +48,7 @@
     @if ($label)
         <label for="{{ $id }}" class="ui-label">
             {{ $label }}
-            @if ($required)
+            @if ($required && $showRequiredMark)
                 <span class="text-red-500">*</span>
             @endif
         </label>

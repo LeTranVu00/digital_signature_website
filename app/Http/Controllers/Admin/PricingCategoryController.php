@@ -112,6 +112,7 @@ class PricingCategoryController extends Controller
                 $pricingCategory ? 'nullable' : 'required',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
+                'mimetypes:image/jpeg,image/png,image/webp',
                 'max:8192',
             ],
         ]);

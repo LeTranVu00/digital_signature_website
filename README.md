@@ -119,19 +119,20 @@ Hoac chay ca hai:
 php artisan migrate:fresh --seed
 ```
 
-## Tai Khoan Demo
+## Tai Khoan Seed
 
-Seeder hien tao 2 tai khoan:
+Seeder chi tao tai khoan khi ban dat bien moi truong trong `.env`:
 
-```text
-Admin
-Email: admin@gmail.com
-Password: 12345678
-
-User
-Email: user@gmail.com
-Password: 12345678
+```env
+ADMIN_NAME="Administrator"
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-local-admin-password
+SEED_USER_NAME="Demo User"
+SEED_USER_EMAIL=user@example.com
+SEED_USER_PASSWORD=your-local-user-password
 ```
+
+Mat khau seed phai co toi thieu 12 ky tu. Tren production, khong dat tai khoan demo `SEED_USER_*`.
 
 ## Chay Ung Dung
 
@@ -231,6 +232,8 @@ php artisan route:cache
 php artisan view:cache
 ```
 
+Tren production, `UserSeeder` yeu cau `ADMIN_EMAIL` va `ADMIN_PASSWORD` trong `.env`; khong dat tai khoan demo `SEED_USER_*`.
+
 Production `.env` can dam bao:
 
 ```env
@@ -242,7 +245,7 @@ DB_CONNECTION=mysql
 
 Khuyen nghi truoc deploy:
 
-- Doi mat khau tai khoan demo hoac xoa demo users.
+- Tao admin production bang `ADMIN_EMAIL` va `ADMIN_PASSWORD` rieng.
 - Cau hinh SMTP that va `MAIL_ADMIN_ADDRESS`.
 - Dung database production rieng, backup dinh ky.
 - Tro web server vao thu muc `public`.

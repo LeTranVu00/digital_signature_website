@@ -3,9 +3,10 @@
 @section('title', 'Trang chủ - Digital Signature')
 
 @section('content')
-    @php
-        $youtubeEmbedUrl = $homeContent['youtube_embed_url'] ?? '';
-    @endphp
+@php
+    $youtubeEmbedUrl = $homeContent['youtube_embed_url'] ?? '';
+    $videoThumbnail = $homeContent['video_thumbnail'] ?? '';
+@endphp
 
     <section
         x-data="{
@@ -192,7 +193,7 @@
                             ></iframe>
                         @else
                             <img
-                                src="{{ asset('images/home-video-thumbnail.png') }}"
+                                src="{{ $videoThumbnail ? asset('storage/' . ltrim($videoThumbnail, '/')) : asset('images/home-video-thumbnail.png') }}"
                                 alt="Video hướng dẫn dịch vụ chữ ký số"
                                 class="h-full w-full object-cover"
                                 loading="lazy"

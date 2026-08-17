@@ -11,6 +11,13 @@ class UpdateCommentRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'content' => trim((string) $this->input('content')),
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
