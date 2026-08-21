@@ -8,6 +8,8 @@
 
     <title>@yield('title', 'CHỮ KÝ SỐ VIP')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
 
     <script>
         if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -37,7 +39,10 @@
                 <img
                     src="{{ asset('images/logo.jpg') }}"
                     alt="CHỮ KÝ SỐ VIP"
-                    class="h-10 w-10 rounded-full object-cover"
+                    width="40"
+                    height="40"
+                    decoding="async"
+                    class="h-10 w-10 rounded-full bg-white object-contain ring-1 ring-red-100"
                 >
                 <span class="hidden sm:inline">CHỮ KÝ SỐ VIP</span>
             </a>
@@ -165,16 +170,12 @@
     </header>
     @endunless
 
-    <main>
-        @yield('content')
-    </main>
-
     @unless (request()->routeIs('home', 'blog.index'))
-        <section class="site-section-cool border-t border-slate-200/80 py-10" data-scroll-section="Tìm kiếm">
+        <section class="border-b border-slate-300 bg-white py-6 pt-28" data-scroll-section="Tìm kiếm">
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <form action="{{ route('blog.index') }}" method="GET">
                     <label for="site-search" class="sr-only">Tìm kiếm trong diễn đàn</label>
-                    <div class="flex flex-col gap-3 rounded-lg border border-white/20 bg-white p-2 shadow-[0_24px_70px_-48px_rgb(15_23_42/0.55)] sm:flex-row sm:items-center">
+                    <div class="flex flex-col gap-3 rounded-lg border-2 border-slate-400 bg-white p-2 shadow-sm sm:flex-row sm:items-center">
                         <div class="flex min-h-12 flex-1 items-center gap-3 px-3 text-slate-500">
                             <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
@@ -198,6 +199,10 @@
             </div>
         </section>
     @endunless
+
+    <main>
+        @yield('content')
+    </main>
 
     @unless (trim($__env->yieldContent('hide_footer')))
         @php
@@ -280,7 +285,7 @@
                 @if ($floatingPhoneLink)
                     <a
                         href="{{ $floatingPhoneLink['url'] }}"
-                        class="floating-support-button ui-focus flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl shadow-red-950/30 ring-2 ring-white transition hover:-translate-y-0.5"
+                        class="floating-support-button floating-support-phone ui-focus flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl shadow-red-950/30 ring-2 ring-white transition hover:-translate-y-0.5"
                         aria-label="{{ $floatingPhoneLink['label'] ?: 'Gọi hỗ trợ' }}"
                     >
                         <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">

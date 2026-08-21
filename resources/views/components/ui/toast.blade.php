@@ -49,17 +49,19 @@
         x-show="show"
         x-on:mouseenter="pause()"
         x-on:mouseleave="resume()"
-        x-transition:enter="duration-300 ease-out"
-        x-transition:enter-start="translate-y-3 opacity-0 sm:translate-x-4 sm:translate-y-0"
-        x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
-        x-transition:leave="duration-200 ease-in"
-        x-transition:leave-start="translate-y-0 opacity-100 sm:translate-x-0"
-        x-transition:leave-end="-translate-y-2 opacity-0 sm:translate-x-4 sm:translate-y-0"
-        {{ $attributes->merge(['class' => 'pointer-events-auto relative w-full overflow-hidden rounded-xl border p-4 pr-10 shadow-xl ring-1 ring-slate-950/5 ' . $toast['classes']]) }}
+        x-on:focusin="pause()"
+        x-on:focusout="resume()"
+        x-transition:enter="duration-250 ease-out"
+        x-transition:enter-start="translate-y-2 scale-[0.97] opacity-0 sm:translate-x-3 sm:translate-y-0"
+        x-transition:enter-end="translate-y-0 scale-100 opacity-100 sm:translate-x-0"
+        x-transition:leave="duration-180 ease-in"
+        x-transition:leave-start="translate-y-0 scale-100 opacity-100 sm:translate-x-0"
+        x-transition:leave-end="-translate-y-1 scale-[0.98] opacity-0 sm:translate-x-2 sm:translate-y-0"
+        {{ $attributes->merge(['class' => 'ui-toast pointer-events-auto relative w-full overflow-hidden rounded-lg border p-3.5 pr-10 ' . $toast['classes']]) }}
         role="{{ $type === 'error' ? 'alert' : 'status' }}"
     >
         <div class="flex gap-3">
-            <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ $toast['iconWrap'] }}">
+            <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ $toast['iconWrap'] }}">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     {!! $toast['icon'] !!}
                 </svg>
@@ -73,7 +75,7 @@
 
         <button
             type="button"
-            class="ui-focus absolute right-3 top-3 rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            class="ui-focus absolute right-2.5 top-2.5 rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             x-on:click="close()"
             aria-label="Đóng thông báo"
         >
@@ -82,7 +84,7 @@
             </svg>
         </button>
 
-        <div class="absolute bottom-0 left-0 h-1 w-full bg-slate-100 dark:bg-slate-800">
+        <div class="absolute bottom-0 left-0 h-0.5 w-full bg-slate-100 dark:bg-slate-800">
             <div
                 x-ref="progress"
                 class="h-full origin-left {{ $toast['bar'] }}"

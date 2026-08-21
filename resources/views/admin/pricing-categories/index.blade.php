@@ -20,14 +20,14 @@
         </div>
     @endif
 
-    <x-ui.table>
+    <x-ui.table table-class="w-full table-fixed">
         <x-slot name="head">
             <tr>
-                <th>Ảnh bảng giá</th>
+                <th class="w-40">Ảnh bảng giá</th>
                 <th>Tên danh mục</th>
-                <th>Thứ tự</th>
-                <th>Trạng thái</th>
-                <th class="text-right">Thao tác</th>
+                <th class="w-20">Thứ tự</th>
+                <th class="w-32">Trạng thái</th>
+                <th class="w-44 text-right">Thao tác</th>
             </tr>
         </x-slot>
 
@@ -41,10 +41,10 @@
                         loading="lazy"
                     >
                 </td>
-                <td>
+                <td class="break-words">
                     <p class="font-semibold text-slate-950">{{ $category->name }}</p>
-                    <p class="mt-1 max-w-xl text-sm text-slate-500">{{ $category->description ?: 'Chưa có mô tả' }}</p>
-                    <x-ui.badge class="mt-2">{{ $category->slug }}</x-ui.badge>
+                    <p class="mt-1 break-words text-sm text-slate-500">{{ $category->description ?: 'Chưa có mô tả' }}</p>
+                    <p class="mt-2 break-all text-xs font-medium text-slate-400">{{ $category->slug }}</p>
                 </td>
                 <td>{{ $category->sort_order }}</td>
                 <td>
@@ -52,11 +52,11 @@
                         {{ $category->is_active ? 'Đang hiển thị' : 'Đang ẩn' }}
                     </x-ui.badge>
                 </td>
-                <td>
+                <td class="whitespace-nowrap">
                     <div class="ui-table-actions">
                         <x-ui.button
                             :href="route('admin.pricing-categories.edit', $category)"
-                            variant="warning"
+                            variant="secondary"
                             size="xs"
                         >
                             Sửa
@@ -65,6 +65,8 @@
                         <x-ui.confirm-delete
                             :action="route('admin.pricing-categories.destroy', $category)"
                             trigger="Xóa"
+                            button-variant="ghost"
+                            trigger-class="text-red-600 hover:bg-red-50 hover:text-red-700"
                             title="Xóa danh mục báo giá?"
                             description="Danh mục và ảnh bảng giá đã upload sẽ bị xóa khỏi website."
                             confirm-text="Xóa danh mục"

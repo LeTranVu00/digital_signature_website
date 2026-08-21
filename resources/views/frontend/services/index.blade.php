@@ -3,7 +3,7 @@
 @section('title', 'Dịch vụ - CHỮ KÝ SỐ VIP')
 
 @section('content')
-    <section class="relative overflow-hidden bg-zinc-950 py-16 text-white sm:py-20 lg:py-24" data-scroll-section="Dịch vụ">
+    <section class="relative overflow-hidden bg-zinc-950 pb-16 pt-32 text-white sm:pb-20 sm:pt-36 lg:pb-24" data-scroll-section="Dịch vụ">
         <div class="absolute inset-0 ui-mesh-bg opacity-70"></div>
         <div class="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8" data-reveal="fade-up">
             @if (! empty($homeContent['hero_title']))

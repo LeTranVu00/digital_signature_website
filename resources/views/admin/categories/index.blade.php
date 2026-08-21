@@ -14,33 +14,29 @@
         </x-slot>
     </x-ui.page-header>
 
-    <x-ui.table>
+    <x-ui.table table-class="w-full table-fixed">
         <x-slot name="head">
             <tr>
-                <th>ID</th>
-                <th>Tên danh mục</th>
-                <th>Slug</th>
+                <th class="w-16">ID</th>
+                <th class="w-[22%]">Tên danh mục</th>
+                <th class="w-[22%]">Slug</th>
                 <th>Mô tả</th>
-                <th class="text-right">Thao tác</th>
+                <th class="w-44 text-right">Thao tác</th>
             </tr>
         </x-slot>
 
         @forelse ($categories as $category)
             <tr>
                 <td>{{ $category->id }}</td>
-                <td class="font-semibold text-slate-950">{{ $category->name }}</td>
-                <td>
-                    <x-ui.badge>{{ $category->slug }}</x-ui.badge>
-                </td>
-                <td class="max-w-md">{{ $category->description ?: 'Chưa có mô tả' }}</td>
-                <td>
+                <td class="break-words font-semibold text-slate-950">{{ $category->name }}</td>
+                <td class="break-words text-sm text-slate-600">{{ $category->slug }}</td>
+                <td class="break-words">{{ $category->description ?: 'Chưa có mô tả' }}</td>
+                <td class="whitespace-nowrap">
                     <div class="ui-table-actions">
                         <x-ui.button
                             :href="route('admin.categories.edit', $category)"
-                            variant="warning"
+                            variant="secondary"
                             size="xs"
-                            title="Sửa danh mục {{ $category->name }}"
-                            aria-label="Sửa danh mục {{ $category->name }}"
                         >
                             Sửa
                         </x-ui.button>
@@ -48,6 +44,8 @@
                         <x-ui.confirm-delete
                             :action="route('admin.categories.destroy', $category)"
                             trigger="Xóa"
+                            button-variant="ghost"
+                            trigger-class="text-red-600 hover:bg-red-50 hover:text-red-700"
                             title="Xóa danh mục?"
                             description="Bạn chắc chắn muốn xóa danh mục này?"
                             confirm-text="Xóa danh mục"

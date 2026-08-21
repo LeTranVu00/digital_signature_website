@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -68,6 +69,11 @@ class SiteContentController extends Controller
         $validated = $request->validate([
             'hero_title' => ['required', 'string', 'max:255'],
             'hero_copy' => ['required', 'string', 'max:1000'],
+            'hero_slides' => ['nullable', 'array'],
+            'hero_slides.*.path' => ['nullable', 'string', 'max:255'],
+            'hero_slides.*.delete' => ['nullable'],
+            'hero_slides_upload' => ['nullable', 'array'],
+            'hero_slides_upload.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'intro_text' => ['required', 'string', 'max:1200'],
             'services' => ['nullable', 'array'],
             'services.*.delete' => ['nullable'],
@@ -93,6 +99,22 @@ class SiteContentController extends Controller
         $stored = SiteSetting::valueFor('home');
         $videoThumbnail = (string) ($stored['video_thumbnail'] ?? '');
         $popupImage = (string) ($stored['popup_image'] ?? '');
+        $storedSlides = collect($stored['hero_slides'] ?? [])
+            ->map(fn (mixed $slide): string => is_array($slide) ? (string) ($slide['path'] ?? '') : (string) $slide)
+            ->filter()
+            ->values();
+        $heroSlides = collect($validated['hero_slides'] ?? [])
+            ->reject(fn (array $slide): bool => filter_var($slide['delete'] ?? false, FILTER_VALIDATE_BOOL))
+            ->map(fn (array $slide): string => trim((string) ($slide['path'] ?? '')))
+            ->filter(fn (string $path): bool => $path !== '' && $storedSlides->contains($path))
+            ->values();
+
+        $deletedSlides = $storedSlides->diff($heroSlides);
+        $deletedSlides->each(fn (string $path) => Storage::disk('public')->delete($path));
+
+        foreach ($request->file('hero_slides_upload', []) as $slide) {
+            $heroSlides->push($this->storeResizedHeroSlide($slide));
+        }
 
         if ($request->hasFile('video_thumbnail')) {
             if ($videoThumbnail !== '') {
@@ -116,10 +138,57 @@ class SiteContentController extends Controller
             'video_thumbnail' => $videoThumbnail,
             'popup_enabled' => $request->boolean('popup_enabled'),
             'popup_image' => $popupImage,
+            'hero_slides_upload' => [],
             'services' => $this->rows($validated['services'] ?? [], ['title', 'desc']),
             'process_steps' => $this->rows($validated['process_steps'] ?? [], ['title', 'desc']),
             'stats' => $this->rows($validated['stats'] ?? [], ['value', 'label']),
+            'hero_slides' => $heroSlides->values()->all(),
         ];
+    }
+
+    private function storeResizedHeroSlide(UploadedFile $file): string
+    {
+        $source = imagecreatefromstring((string) file_get_contents($file->getRealPath()));
+
+        if (! $source) {
+            throw new \RuntimeException('Không thể đọc ảnh banner trang chủ.');
+        }
+
+        $targetWidth = 1600;
+        $targetHeight = 700;
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+        $sourceRatio = $sourceWidth / max(1, $sourceHeight);
+        $targetRatio = $targetWidth / $targetHeight;
+
+        if ($sourceRatio > $targetRatio) {
+            $cropHeight = $sourceHeight;
+            $cropWidth = (int) round($sourceHeight * $targetRatio);
+            $sourceX = (int) floor(($sourceWidth - $cropWidth) / 2);
+            $sourceY = 0;
+        } else {
+            $cropWidth = $sourceWidth;
+            $cropHeight = (int) round($sourceWidth / $targetRatio);
+            $sourceX = 0;
+            $sourceY = (int) floor(($sourceHeight - $cropHeight) / 2);
+        }
+
+        $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+        $background = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $background);
+        imagecopyresampled($canvas, $source, 0, 0, $sourceX, $sourceY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
+
+        ob_start();
+        imagejpeg($canvas, null, 86);
+        $contents = ob_get_clean();
+
+        imagedestroy($source);
+        imagedestroy($canvas);
+
+        $path = 'home-slider/'.str()->random(40).'.jpg';
+        Storage::disk('public')->put($path, $contents);
+
+        return $path;
     }
 
     private function pricingData(Request $request): array
@@ -261,6 +330,7 @@ class SiteContentController extends Controller
             'qr_card.label' => ['nullable', 'string', 'max:160'],
             'qr_card.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'support_links' => ['nullable', 'array'],
+            'support_links.*.delete' => ['nullable'],
             'support_links.*.type' => ['nullable', 'string', 'in:zalo,phone'],
             'support_links.*.label' => ['nullable', 'string', 'max:160'],
             'support_links.*.url' => ['nullable', 'string', 'max:500', $this->supportUrlRule()],
@@ -384,6 +454,7 @@ class SiteContentController extends Controller
     private function supportLinks(array $rows): array
     {
         return collect($rows)
+            ->reject(fn (array $row): bool => filter_var($row['delete'] ?? false, FILTER_VALIDATE_BOOL))
             ->map(function (array $row): array {
                 $type = (string) ($row['type'] ?? 'zalo');
 

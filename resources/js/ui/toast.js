@@ -6,6 +6,7 @@ export function registerToast(Alpine) {
         timer: null,
 
         start() {
+            window.clearTimeout(this.timer);
             this.startedAt = Date.now();
             this.timer = window.setTimeout(() => this.close(), this.remaining);
         },
@@ -16,7 +17,12 @@ export function registerToast(Alpine) {
         },
 
         pause() {
+            if (! this.timer || ! this.startedAt) {
+                return;
+            }
+
             window.clearTimeout(this.timer);
+            this.timer = null;
             this.remaining = Math.max(0, this.remaining - (Date.now() - this.startedAt));
 
             if (this.$refs.progress) {
@@ -25,6 +31,10 @@ export function registerToast(Alpine) {
         },
 
         resume() {
+            if (! this.show || this.remaining <= 0) {
+                return;
+            }
+
             if (this.$refs.progress) {
                 this.$refs.progress.style.animationPlayState = 'running';
             }

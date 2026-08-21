@@ -1349,6 +1349,61 @@
                 </div>
             </x-ui.card>
 
+            <x-ui.card title="Ảnh lớn trang chủ" description="Ảnh sẽ được cắt và resize đồng nhất về 1600 × 700 px để slider không bị lệch. Bạn có thể upload nhiều ảnh và xóa ảnh cũ tùy ý.">
+                <div class="grid gap-5">
+                    <div data-file-upload>
+                        <label class="ui-label" for="hero-slides-upload">Upload ảnh slider</label>
+                        <input
+                            id="hero-slides-upload"
+                            type="file"
+                            name="hero_slides_upload[]"
+                            multiple
+                            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                            class="ui-control h-14 p-0 leading-[3.5rem] text-slate-600 file:mr-4 file:h-14 file:border-0 file:bg-red-600 file:px-4 file:py-0 file:text-sm file:font-semibold file:leading-[3.5rem] file:text-white hover:file:bg-red-700"
+                            x-on:change="handleFileChoice($event, 'Ảnh slider mới sẽ được resize và lưu khi bấm Lưu nội dung.')"
+                        >
+                        <p class="ui-helper">Có thể chọn nhiều ảnh. Hệ thống tự cắt giữa ảnh để đưa về tỷ lệ 1600 × 700.</p>
+                        <div class="mt-3" data-upload-preview></div>
+                    </div>
+
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-home-repeater-list="hero_slides">
+                        @forelse (array_values($activeSettings['hero_slides'] ?? []) as $index => $slide)
+                            @php
+                                $slidePath = is_array($slide) ? ($slide['path'] ?? '') : $slide;
+                            @endphp
+                            @if ($slidePath !== '')
+                                <div class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm transition" data-home-repeater-item="hero_slides" data-home-index="{{ $index }}">
+                                    <input type="hidden" name="hero_slides[{{ $index }}][path]" value="{{ $slidePath }}">
+                                    <input type="hidden" name="hero_slides[{{ $index }}][delete]" value="1" disabled data-home-repeater-delete-input>
+                                    <img
+                                        src="{{ asset('storage/' . ltrim($slidePath, '/')) }}"
+                                        alt="Ảnh slider {{ $index + 1 }}"
+                                        class="aspect-[16/7] w-full rounded-lg border border-slate-100 object-cover"
+                                    >
+                                    <div class="mt-2 flex items-center justify-between gap-2">
+                                        <p class="truncate text-xs font-semibold text-slate-500">Ảnh {{ $index + 1 }} · 1600 × 700</p>
+                                        <button
+                                            type="button"
+                                            class="ui-focus inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                                            data-toggle-home-repeater-delete
+                                            aria-label="Xóa ảnh slider {{ $index + 1 }}"
+                                            title="Xóa ảnh này"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                        </button>
+                                    </div>
+                                    <p class="hidden mt-2 text-xs font-semibold text-red-600" data-home-repeater-delete-message>Ảnh này sẽ bị xóa khi lưu.</p>
+                                </div>
+                            @endif
+                        @empty
+                            <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-center text-sm font-semibold text-slate-500 sm:col-span-2 lg:col-span-3">
+                                Chưa có ảnh slider upload từ admin. Hệ thống đang dùng ảnh mặc định.
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </x-ui.card>
+
             <x-ui.card title="Popup thông báo trang chủ" description="Popup sẽ tự mở khi khách truy cập trang chủ nếu được bật và đã có ảnh.">
                 <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
                     <div class="grid content-start gap-3">
@@ -2186,19 +2241,75 @@
                 </div>
             </x-ui.card>
 
-            <x-ui.card title="Các ô thông tin liên hệ">
-                <div class="grid gap-4 lg:grid-cols-3">
-                    @foreach ($padRows($activeSettings['cards'] ?? [], 5, ['title' => '', 'value' => '', 'desc' => '']) as $index => $row)
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <p class="mb-3 text-sm font-bold text-slate-500">Ô {{ $index + 1 }}</p>
-                            <div class="grid gap-3">
+            <x-ui.card title="Các ô thông tin liên hệ" description="Thêm bao nhiêu ô tùy ý. Mục được đánh dấu xóa sẽ bị loại khi bấm lưu.">
+                <x-slot:actions>
+                    <button
+                        type="button"
+                        class="ui-focus inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100"
+                        data-add-home-repeater="contact_cards"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        Thêm ô liên hệ
+                    </button>
+                </x-slot:actions>
+
+                <div class="grid gap-3" data-home-repeater-list="contact_cards">
+                    @forelse (array_values($activeSettings['cards'] ?? []) as $index => $row)
+                        <details
+                            class="group overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition"
+                            data-home-repeater-item="contact_cards"
+                            data-home-index="{{ $index }}"
+                        >
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-red-50/60 [&::-webkit-details-marker]:hidden">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-slate-500">Ô liên hệ {{ $index + 1 }}</p>
+                                    <h3 class="truncate text-lg font-extrabold text-slate-950">{{ $row['title'] ?: 'Chưa nhập tiêu đề' }}</h3>
+                                </div>
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 transition group-open:rotate-180">
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            </summary>
+                            <div class="grid gap-3 border-t border-slate-200 p-4">
+                                <input type="hidden" name="cards[{{ $index }}][delete]" value="1" disabled data-home-repeater-delete-input>
+                                <div class="flex justify-end">
+                                    <button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                                        Xóa ô này
+                                    </button>
+                                </div>
+                                <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Ô này đang được chọn xóa khi lưu.</p>
                                 <x-ui.input name="cards[{{ $index }}][title]" label="Tiêu đề" :value="$row['title'] ?? ''" />
                                 <x-ui.input name="cards[{{ $index }}][value]" label="Nội dung nổi bật" :value="$row['value'] ?? ''" />
                                 <x-ui.textarea name="cards[{{ $index }}][desc]" label="Mô tả" :value="$row['desc'] ?? ''" rows="3" />
                             </div>
+                        </details>
+                    @empty
+                        <div class="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-center text-sm font-semibold text-slate-500" data-home-repeater-empty="contact_cards">
+                            Chưa có ô liên hệ nào. Bấm “Thêm ô liên hệ” để tạo mục đầu tiên.
                         </div>
-                    @endforeach
+                    @endforelse
                 </div>
+
+                <template data-blank-home-repeater-template="contact_cards">
+                    <details class="group overflow-hidden rounded-xl border border-red-200 bg-red-50/30 shadow-sm" data-home-repeater-item="contact_cards" data-home-index="__INDEX__" open>
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 [&::-webkit-details-marker]:hidden">
+                            <div class="min-w-0"><p class="text-sm font-bold text-slate-500">Ô liên hệ __NUMBER__</p><h3 class="truncate text-lg font-extrabold text-slate-400">Chưa nhập tiêu đề</h3></div>
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg></span>
+                        </summary>
+                        <div class="grid gap-3 border-t border-slate-200 p-4">
+                            <input type="hidden" name="cards[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input>
+                            <div class="flex justify-end"><button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg> Xóa ô này</button></div>
+                            <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Ô này đang được chọn xóa khi lưu.</p>
+                            <x-ui.input name="cards[__INDEX__][title]" label="Tiêu đề" />
+                            <x-ui.input name="cards[__INDEX__][value]" label="Nội dung nổi bật" />
+                            <x-ui.textarea name="cards[__INDEX__][desc]" label="Mô tả" rows="3" />
+                        </div>
+                    </details>
+                </template>
             </x-ui.card>
 
             <x-ui.card title="Form liên hệ và QR">
@@ -2232,16 +2343,25 @@
                 </div>
             </x-ui.card>
 
-            <x-ui.card
-                title="Nút Zalo và điện thoại nổi"
-                description="Các link Zalo sẽ hiện thành danh sách khi khách bấm nút Zalo. Link điện thoại đầu tiên sẽ dùng cho nút gọi nhanh."
-            >
-                <div class="grid gap-4 lg:grid-cols-2">
-                    @foreach ($padRows($activeSettings['support_links'] ?? [], 8, ['type' => 'zalo', 'label' => '', 'url' => '']) as $index => $row)
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <p class="mb-3 text-sm font-bold text-slate-500">Kênh hỗ trợ {{ $index + 1 }}</p>
+            <x-ui.card title="Nút Zalo và điện thoại nổi" description="Thêm bao nhiêu kênh tùy ý. Zalo sẽ hiện trong danh sách, điện thoại đầu tiên sẽ dùng cho nút gọi nhanh.">
+                <x-slot:actions>
+                    <button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-100" data-add-home-repeater="support_links">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                        Thêm kênh hỗ trợ
+                    </button>
+                </x-slot:actions>
 
-                            <div class="grid gap-3">
+                <div class="grid gap-3" data-home-repeater-list="support_links">
+                    @forelse (array_values($activeSettings['support_links'] ?? []) as $index => $row)
+                        <details class="group overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm transition" data-home-repeater-item="support_links" data-home-index="{{ $index }}">
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 transition hover:bg-red-50/60 [&::-webkit-details-marker]:hidden">
+                                <div class="min-w-0"><p class="text-sm font-bold text-slate-500">Kênh hỗ trợ {{ $index + 1 }}</p><h3 class="truncate text-lg font-extrabold text-slate-950">{{ $row['label'] ?: 'Chưa đặt tên kênh' }}</h3></div>
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 transition group-open:rotate-180"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1-.02-1.06Z" clip-rule="evenodd" /></svg></span>
+                            </summary>
+                            <div class="grid gap-3 border-t border-slate-200 p-4">
+                                <input type="hidden" name="support_links[{{ $index }}][delete]" value="1" disabled data-home-repeater-delete-input>
+                                <div class="flex justify-end"><button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg> Xóa kênh này</button></div>
+                                <p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Kênh này đang được chọn xóa khi lưu.</p>
                                 <x-ui.select name="support_links[{{ $index }}][type]" label="Loại">
                                     <option value="zalo" @selected(($row['type'] ?? 'zalo') === 'zalo')>Zalo</option>
                                     <option value="phone" @selected(($row['type'] ?? 'zalo') === 'phone')>Điện thoại</option>
@@ -2261,9 +2381,18 @@
                                     helper="Zalo: https://zalo.me/0900000000. Điện thoại: tel:0900000000."
                                 />
                             </div>
-                        </div>
-                    @endforeach
+                        </details>
+                    @empty
+                        <div class="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-center text-sm font-semibold text-slate-500" data-home-repeater-empty="support_links">Chưa có kênh hỗ trợ nào. Bấm “Thêm kênh hỗ trợ” để tạo mục đầu tiên.</div>
+                    @endforelse
                 </div>
+
+                <template data-blank-home-repeater-template="support_links">
+                    <details class="group overflow-hidden rounded-xl border border-red-200 bg-red-50/30 shadow-sm" data-home-repeater-item="support_links" data-home-index="__INDEX__" open>
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 [&::-webkit-details-marker]:hidden"><div class="min-w-0"><p class="text-sm font-bold text-slate-500">Kênh hỗ trợ __NUMBER__</p><h3 class="truncate text-lg font-extrabold text-slate-400">Chưa đặt tên kênh</h3></div><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25-4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg></span></summary>
+                        <div class="grid gap-3 border-t border-slate-200 p-4"><input type="hidden" name="support_links[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input><div class="flex justify-end"><button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg> Xóa kênh này</button></div><p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Kênh này đang được chọn xóa khi lưu.</p><x-ui.select name="support_links[__INDEX__][type]" label="Loại"><option value="zalo">Zalo</option><option value="phone">Điện thoại</option></x-ui.select><x-ui.input name="support_links[__INDEX__][label]" label="Tên hiển thị" helper="Ví dụ: Hỗ trợ doanh nghiệp, Kỹ thuật, Hotline." /><x-ui.input name="support_links[__INDEX__][url]" label="Link khách nhấn" helper="Zalo: https://zalo.me/0900000000. Điện thoại: tel:0900000000." /></div>
+                    </details>
+                </template>
             </x-ui.card>
 
         @endif
@@ -2598,10 +2727,10 @@
 
         @endif
 
-        <div class="sticky bottom-4 z-10 ml-auto flex w-fit justify-end rounded-2xl border border-amber-100 bg-white/95 p-2 shadow-[0_18px_45px_rgba(15,23,42,0.14)] backdrop-blur">
+        <div class="sticky bottom-4 z-10 ml-auto flex w-fit justify-end rounded-xl border border-red-100 bg-white p-2 shadow-sm">
             <button
                 type="submit"
-                class="ui-focus inline-flex min-w-36 items-center justify-center gap-2 rounded-xl border border-amber-500/20 bg-amber-400 px-5 py-3 text-sm font-extrabold text-zinc-950 shadow-[0_10px_22px_rgba(245,158,11,0.32)] transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-[0_14px_28px_rgba(245,158,11,0.38)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+            class="ui-focus inline-flex min-w-36 items-center justify-center gap-2 rounded-lg border border-red-600 bg-red-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-red-700 active:bg-red-800 disabled:cursor-not-allowed disabled:opacity-70"
                 x-bind:disabled="saving"
             >
                 <svg x-show="! saving" class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">

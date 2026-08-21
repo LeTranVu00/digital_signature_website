@@ -8,7 +8,7 @@
     x-transition:leave="duration-150 ease-in"
     x-transition:leave-start="translate-y-0 opacity-100"
     x-transition:leave-end="translate-y-3 opacity-0"
-    class="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6"
+    class="fixed bottom-4 right-4 z-50 flex flex-col items-end sm:bottom-6 sm:right-6"
 >
     <div
         id="scroll-navigator-menu"
@@ -48,11 +48,6 @@
                     x-bind:class="activeId === section.id ? 'bg-gradient-to-r from-amber-50 via-white to-red-50 text-red-700 shadow-sm ring-1 ring-amber-100 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-500/20' : 'text-slate-700 hover:bg-white/85 hover:text-red-600 hover:shadow-sm dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-amber-200'"
                     x-on:click="scrollToSection(section.id)"
                 >
-                    <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ring-1 transition"
-                        x-bind:class="activeId === section.id ? 'bg-red-600 text-white ring-red-200' : 'bg-amber-50 text-amber-700 ring-amber-100 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-500/20'"
-                        x-text="section.index"
-                    ></span>
                     <span class="min-w-0 truncate" x-text="section.label"></span>
                 </button>
             </template>
@@ -61,13 +56,13 @@
 
     <button
         type="button"
-        class="ui-focus flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-slate-950 via-slate-900 to-red-950 text-amber-300 shadow-xl shadow-slate-950/30 ring-1 ring-amber-300/40 transition duration-200 ease-out hover:-translate-y-0.5 hover:text-amber-200"
+        class="ui-focus flex h-12 w-12 self-end items-center justify-center rounded-full bg-gradient-to-br from-slate-950 via-slate-900 to-red-950 text-amber-300 shadow-xl shadow-slate-950/30 ring-1 ring-amber-300/40 transition duration-200 ease-out hover:-translate-y-0.5 hover:text-amber-200"
         x-on:click="toggle()"
         x-bind:aria-expanded="open.toString()"
         aria-controls="scroll-navigator-menu"
         aria-label="Mở điều hướng đề mục"
     >
-        <svg class="h-5 w-5 transition duration-200" x-bind:class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="h-5 w-5 transition duration-200" x-bind:class="open ? '-rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0-6 6m6-6 6 6" />
         </svg>
     </button>

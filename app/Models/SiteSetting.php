@@ -38,6 +38,7 @@ class SiteSetting extends Model
             'home' => [
                 'hero_title' => '',
                 'hero_copy' => '',
+                'hero_slides' => [],
                 'intro_text' => '',
                 'services' => [],
                 'process_intro' => '',

@@ -135,6 +135,42 @@ class AdminSiteContentTest extends TestCase
             ->assertSee('storage/'.$thumbnail, false);
     }
 
+    public function test_admin_can_upload_resized_home_hero_slides(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.site-content.index', ['tab' => 'home']))
+            ->assertOk()
+            ->assertSee('name="hero_slides_upload[]"', false)
+            ->assertSee('1600 × 700', false);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'home'), [
+                'hero_title' => 'Trang chu',
+                'hero_copy' => 'Mo ta hero',
+                'intro_text' => 'Noi dung gioi thieu',
+                'process_intro' => 'Quy trinh ro rang',
+                'hero_slides_upload' => [
+                    UploadedFile::fake()->image('hero-wide.png', 2400, 1000),
+                ],
+                'cta_title' => 'Can ho tro?',
+                'cta_copy' => 'Lien he chung toi.',
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'home']));
+
+        $slides = SiteSetting::valueFor('home')['hero_slides'];
+        $this->assertCount(1, $slides);
+        $this->assertStringStartsWith('home-slider/', $slides[0]);
+        Storage::disk('public')->assertExists($slides[0]);
+
+        $dimensions = getimagesize(Storage::disk('public')->path($slides[0]));
+        $this->assertSame(1600, $dimensions[0]);
+        $this->assertSame(700, $dimensions[1]);
+    }
+
     public function test_admin_can_upload_and_enable_home_popup(): void
     {
         Storage::fake('public');
@@ -381,6 +417,40 @@ class AdminSiteContentTest extends TestCase
             ->assertSee('Zalo kinh doanh')
             ->assertSee('Zalo ky thuat')
             ->assertSee('tel:0900000000', false);
+    }
+
+    public function test_admin_can_add_and_delete_dynamic_contact_rows(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'contact'), [
+                'hero_title' => 'Lien he',
+                'hero_copy' => 'Mo ta lien he',
+                'cards' => [
+                    ['title' => 'Giu lai', 'value' => '0932', 'desc' => 'Hotline'],
+                    ['delete' => '1', 'title' => 'Xoa di', 'value' => '0000', 'desc' => 'Khong dung'],
+                    ['title' => 'Them moi', 'value' => '0971', 'desc' => 'Zalo'],
+                ],
+                'form_title' => 'Gui thong tin',
+                'form_copy' => 'Mo ta form',
+                'support_links' => [
+                    ['type' => 'zalo', 'label' => 'Zalo giu lai', 'url' => 'https://zalo.me/0900000000'],
+                    ['delete' => '1', 'type' => 'zalo', 'label' => 'Zalo xoa', 'url' => 'https://zalo.me/0911111111'],
+                    ['type' => 'phone', 'label' => 'Hotline moi', 'url' => 'tel:0932000000'],
+                ],
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'contact']));
+
+        $contact = SiteSetting::valueFor('contact');
+
+        $this->assertSame([
+            ['title' => 'Giu lai', 'value' => '0932', 'desc' => 'Hotline'],
+            ['title' => 'Them moi', 'value' => '0971', 'desc' => 'Zalo'],
+        ], $contact['cards']);
+        $this->assertCount(2, $contact['support_links']);
+        $this->assertSame('Zalo giu lai', $contact['support_links'][0]['label']);
+        $this->assertSame('Hotline moi', $contact['support_links'][1]['label']);
     }
 
     public function test_frontend_software_page_shows_category_tabs(): void

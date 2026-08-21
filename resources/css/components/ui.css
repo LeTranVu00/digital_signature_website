@@ -122,8 +122,13 @@
     }
 
     .floating-support-button {
+        animation: floating-support-bob 3.2s ease-in-out infinite;
         isolation: isolate;
         position: relative;
+    }
+
+    .floating-support-phone {
+        animation-delay: -1.6s;
     }
 
     .floating-support-button::before {
@@ -137,7 +142,19 @@
         z-index: -1;
     }
 
+    @keyframes floating-support-bob {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
     @media (prefers-reduced-motion: reduce) {
+        .floating-support-button,
         .floating-support-button::before {
             animation: none;
         }

@@ -6,6 +6,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'CHỮ KÝ SỐ VIP') }}</title>
+        <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
 
         <script>
             (() => {

@@ -1,4 +1,14 @@
 @layer components {
+    .ui-toast {
+        border-left-width: 4px;
+        box-shadow: 0 12px 28px -18px rgb(15 23 42 / 0.5);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .ui-toast:hover {
+        box-shadow: 0 16px 34px -18px rgb(15 23 42 / 0.58);
+    }
+
     .ui-page-enter {
         animation: ui-fade-up 0.34s var(--ease-ui) both;
     }

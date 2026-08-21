@@ -19,10 +19,25 @@ class PageController extends Controller
             ->limit(3)
             ->get();
 
-        $heroSlides = collect(glob(public_path('images/home-slider/*.{jpg,jpeg,png,webp,avif}'), GLOB_BRACE) ?: [])
-            ->sort()
-            ->map(fn (string $path) => asset('images/home-slider/'.basename($path)))
+        $homeContent = SiteSetting::valueFor('home');
+        $heroSlides = collect($homeContent['hero_slides'] ?? [])
+            ->map(function (mixed $path): string {
+                $path = is_array($path) ? ($path['path'] ?? '') : $path;
+                $path = trim((string) $path);
+
+                return filter_var($path, FILTER_VALIDATE_URL)
+                    ? $path
+                    : asset('storage/'.ltrim($path, '/'));
+            })
+            ->filter()
             ->values();
+
+        if ($heroSlides->isEmpty()) {
+            $heroSlides = collect(glob(public_path('images/home-slider/*.{jpg,jpeg,png,webp,avif}'), GLOB_BRACE) ?: [])
+                ->sort()
+                ->map(fn (string $path) => asset('images/home-slider/'.basename($path)))
+                ->values();
+        }
 
         if ($heroSlides->isEmpty()) {
             $heroSlides = collect([
@@ -32,7 +47,6 @@ class PageController extends Controller
             ]);
         }
 
-        $homeContent = SiteSetting::valueFor('home');
         $services = $homeContent['services'] ?? [];
         $processSteps = $homeContent['process_steps'] ?? [];
         $stats = $homeContent['stats'] ?? [];
