@@ -10,8 +10,8 @@
 
 @php
     $variants = [
-        'primary' => 'border-transparent bg-amber-400 text-zinc-950 shadow-sm hover:bg-amber-300 active:bg-amber-500 dark:bg-amber-400 dark:text-zinc-950 dark:hover:bg-amber-300',
-        'secondary' => 'border-slate-300 bg-white text-slate-700 shadow-sm hover:border-amber-300 hover:bg-amber-50 hover:text-zinc-950 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-amber-400 dark:hover:bg-slate-800 dark:hover:text-amber-200',
+        'primary' => 'border-transparent bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800 dark:bg-red-500 dark:hover:bg-red-400',
+        'secondary' => 'border-slate-300 bg-white text-slate-700 shadow-sm hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-red-400 dark:hover:bg-slate-800 dark:hover:text-red-200',
         'danger' => 'border-transparent bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800 dark:bg-red-500 dark:hover:bg-red-400',
         'success' => 'border-transparent bg-green-600 text-white shadow-sm hover:bg-green-700 active:bg-green-800 dark:bg-green-500 dark:hover:bg-green-400',
         'warning' => 'border-transparent bg-amber-500 text-white shadow-sm hover:bg-amber-600 active:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400',

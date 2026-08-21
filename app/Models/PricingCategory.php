@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class PricingCategory extends Model
 {
@@ -35,6 +36,19 @@ class PricingCategory extends Model
 
     public function imageUrl(): string
     {
-        return asset('storage/'.ltrim($this->image_path, '/'));
+        $path = trim((string) $this->image_path);
+
+        if ($path === '') {
+            return '';
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+        $path = preg_replace('#^(?:public/|storage/)+#', '', $path) ?: $path;
+
+        return Storage::disk('public')->url($path);
     }
 }

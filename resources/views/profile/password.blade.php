@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Đổi mật khẩu - Digital Signature')
+@section('title', 'Đổi mật khẩu - CHỮ KÝ SỐ VIP')
 
 @section('content')
     <section class="bg-slate-50 py-10 dark:bg-slate-950 sm:py-14">

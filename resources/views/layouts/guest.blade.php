@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Digital Signature') }}</title>
+        <title>{{ config('app.name', 'CHỮ KÝ SỐ VIP') }}</title>
 
         <script>
             (() => {
@@ -56,7 +56,7 @@
                 ],
                 default => [
                     'title' => 'Đăng nhập',
-                    'copy' => 'Truy cập tài khoản Digital Signature của bạn.',
+                    'copy' => 'Truy cập tài khoản CHỮ KÝ SỐ VIP của bạn.',
                 ],
             };
         @endphp
@@ -72,10 +72,10 @@
                 <a href="/" class="inline-flex items-center gap-3">
                     <img
                         src="{{ asset('images/logo.jpg') }}"
-                        alt="Digital Signature"
+                        alt="CHỮ KÝ SỐ VIP"
                         class="h-12 w-12 rounded-full object-cover shadow-lg shadow-amber-900/20 ring-4 ring-white dark:ring-slate-800"
                     >
-                    <span class="text-xl font-extrabold text-slate-950 dark:text-white">Digital Signature</span>
+                    <span class="text-xl font-extrabold text-slate-950 dark:text-white">CHỮ KÝ SỐ VIP</span>
                 </a>
             </div>
 

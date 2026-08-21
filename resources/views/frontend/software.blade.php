@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Phần mềm hỗ trợ - Digital Signature')
+@section('title', 'Phần mềm hỗ trợ - CHỮ KÝ SỐ VIP')
 
 @section('content')
     <section class="relative overflow-hidden bg-zinc-950 py-20 text-white sm:py-24" data-scroll-section="Phần mềm hỗ trợ">
@@ -30,7 +30,7 @@
                         <button
                             type="button"
                             class="ui-focus inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-extrabold transition"
-                            x-bind:class="activeCategory === {{ $categoryIndex }} ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-600 hover:bg-amber-50 hover:text-amber-800'"
+                            x-bind:class="activeCategory === {{ $categoryIndex }} ? 'bg-red-600 text-white shadow-sm' : 'text-slate-600 hover:bg-red-50 hover:text-red-700'"
                             x-on:click="activeCategory = {{ $categoryIndex }}"
                             role="tab"
                             x-bind:aria-selected="(activeCategory === {{ $categoryIndex }}).toString()"
@@ -58,13 +58,13 @@
                                     <div class="flex flex-wrap items-start justify-between gap-4">
                                         <div>
                                             <p class="text-sm font-extrabold uppercase tracking-normal text-red-600">{{ $item['type'] }}</p>
-                                            <h2 class="mt-2 text-2xl font-extrabold text-slate-950">{{ $item['name'] }}</h2>
+                                            <h2 class="mt-2 text-2xl font-extrabold text-red-600">{{ $item['name'] }}</h2>
                                         </div>
                                         <a
                                             href="{{ $item['url'] }}"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            class="inline-flex rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                                            class="inline-flex rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
                                         >
                                             Tải về
                                         </a>

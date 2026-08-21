@@ -1,4 +1,4 @@
-# Digital Signature Website
+# CHỮ KÝ SỐ VIP Website
 
 Website doanh nghiep cho dich vu chu ky so, hoa don dien tu va hop dong dien tu. Du an gom frontend gioi thieu dich vu, blog, form lien he tao lead, va khu vuc admin quan ly noi dung.
 
@@ -75,7 +75,7 @@ php artisan storage:link
 Cac bien quan trong:
 
 ```env
-APP_NAME="Digital Signature"
+APP_NAME="CHỮ KÝ SỐ VIP"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://127.0.0.1:8000

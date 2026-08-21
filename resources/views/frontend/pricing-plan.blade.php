@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', ($pricingPlan['name'] ?? 'Chi tiết báo giá') . ' - Digital Signature')
+@section('title', ($pricingPlan['name'] ?? 'Chi tiết báo giá') . ' - CHỮ KÝ SỐ VIP')
 
 @section('content')
     <section class="relative overflow-hidden bg-zinc-950 py-16 text-white sm:py-20" data-scroll-section="Chi tiết báo giá">

@@ -16,10 +16,10 @@
 @source "../../node_modules/flowbite";
 
 @theme {
-    --color-brand-primary: #f59e0b;
-    --color-brand-primary-dark: #d97706;
+    --color-brand-primary: #dc2626;
+    --color-brand-primary-dark: #b91c1c;
     --color-brand-secondary: #020617;
-    --color-brand-accent: #fbbf24;
+    --color-brand-accent: #ef4444;
     --color-brand-surface: #ffffff;
     --color-brand-muted: #f8fafc;
     --shadow-ui-soft: 0 18px 45px -28px rgb(15 23 42 / 0.42);

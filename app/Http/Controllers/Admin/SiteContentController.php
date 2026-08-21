@@ -76,6 +76,8 @@ class SiteContentController extends Controller
             'process_intro' => ['required', 'string', 'max:255'],
             'youtube_embed_url' => ['nullable', 'url', 'max:500', $this->httpUrlRule()],
             'video_thumbnail' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'popup_enabled' => ['nullable', 'boolean'],
+            'popup_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'process_steps' => ['nullable', 'array'],
             'process_steps.*.delete' => ['nullable'],
             'process_steps.*.title' => ['nullable', 'string', 'max:120'],
@@ -90,6 +92,7 @@ class SiteContentController extends Controller
 
         $stored = SiteSetting::valueFor('home');
         $videoThumbnail = (string) ($stored['video_thumbnail'] ?? '');
+        $popupImage = (string) ($stored['popup_image'] ?? '');
 
         if ($request->hasFile('video_thumbnail')) {
             if ($videoThumbnail !== '') {
@@ -99,10 +102,20 @@ class SiteContentController extends Controller
             $videoThumbnail = $request->file('video_thumbnail')->store('home', 'public');
         }
 
+        if ($request->hasFile('popup_image')) {
+            if ($popupImage !== '') {
+                Storage::disk('public')->delete($popupImage);
+            }
+
+            $popupImage = $request->file('popup_image')->store('home-popup', 'public');
+        }
+
         return [
             ...$validated,
             'youtube_embed_url' => $this->youtubeEmbedUrl($validated['youtube_embed_url'] ?? ''),
             'video_thumbnail' => $videoThumbnail,
+            'popup_enabled' => $request->boolean('popup_enabled'),
+            'popup_image' => $popupImage,
             'services' => $this->rows($validated['services'] ?? [], ['title', 'desc']),
             'process_steps' => $this->rows($validated['process_steps'] ?? [], ['title', 'desc']),
             'stats' => $this->rows($validated['stats'] ?? [], ['value', 'label']),
@@ -246,16 +259,33 @@ class SiteContentController extends Controller
             'form_copy' => ['required', 'string', 'max:1000'],
             'qr_card' => ['nullable', 'array'],
             'qr_card.label' => ['nullable', 'string', 'max:160'],
-            'qr_card.url' => ['nullable', 'url', 'max:500', $this->httpUrlRule()],
+            'qr_card.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'support_links' => ['nullable', 'array'],
+            'support_links.*.type' => ['nullable', 'string', 'in:zalo,phone'],
+            'support_links.*.label' => ['nullable', 'string', 'max:160'],
+            'support_links.*.url' => ['nullable', 'string', 'max:500', $this->supportUrlRule()],
         ]);
+
+        $stored = SiteSetting::valueFor('contact');
+        $storedQrCard = is_array($stored['qr_card'] ?? null) ? $stored['qr_card'] : [];
+        $qrImage = trim((string) ($storedQrCard['image'] ?? ''));
+
+        if ($request->hasFile('qr_card.image')) {
+            if ($qrImage !== '') {
+                Storage::disk('public')->delete($qrImage);
+            }
+
+            $qrImage = $request->file('qr_card.image')->store('contact', 'public');
+        }
 
         return [
             ...$validated,
             'cards' => $this->rows($validated['cards'] ?? [], ['title', 'value', 'desc']),
             'qr_card' => [
                 'label' => trim((string) ($validated['qr_card']['label'] ?? '')),
-                'url' => trim((string) ($validated['qr_card']['url'] ?? '')),
+                'image' => $qrImage,
             ],
+            'support_links' => $this->supportLinks($validated['support_links'] ?? []),
         ];
     }
 
@@ -351,6 +381,23 @@ class SiteContentController extends Controller
             ->all();
     }
 
+    private function supportLinks(array $rows): array
+    {
+        return collect($rows)
+            ->map(function (array $row): array {
+                $type = (string) ($row['type'] ?? 'zalo');
+
+                return [
+                    'type' => in_array($type, ['zalo', 'phone'], true) ? $type : 'zalo',
+                    'label' => trim((string) ($row['label'] ?? '')),
+                    'url' => trim((string) ($row['url'] ?? '')),
+                ];
+            })
+            ->filter(fn (array $row): bool => $row['url'] !== '')
+            ->values()
+            ->all();
+    }
+
     private function textRows(array $rows): array
     {
         return collect($rows)
@@ -376,6 +423,23 @@ class SiteContentController extends Controller
 
             if (! in_array($scheme, ['http', 'https'], true)) {
                 $fail('Duong dan phai su dung http hoac https.');
+            }
+        };
+    }
+
+    private function supportUrlRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            $value = trim((string) $value);
+
+            if ($value === '') {
+                return;
+            }
+
+            $scheme = strtolower((string) parse_url($value, PHP_URL_SCHEME));
+
+            if (! in_array($scheme, ['http', 'https', 'tel'], true)) {
+                $fail('Duong dan phai su dung http, https hoac tel.');
             }
         };
     }

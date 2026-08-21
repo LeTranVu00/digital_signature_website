@@ -1,12 +1,35 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Trang chủ - Digital Signature')
+@section('title', 'Trang chủ - CHỮ KÝ SỐ VIP')
 
 @section('content')
 @php
     $youtubeEmbedUrl = $homeContent['youtube_embed_url'] ?? '';
     $videoThumbnail = $homeContent['video_thumbnail'] ?? '';
+    $popupImage = $homeContent['popup_image'] ?? '';
 @endphp
+
+@if (($homeContent['popup_enabled'] ?? false) && $popupImage)
+    <x-ui.modal name="home-announcement" :show="true" maxWidth="2xl" title="Thông báo">
+        <div class="relative bg-white p-3 sm:p-5">
+            <button
+                type="button"
+                x-on:click="close()"
+                class="ui-focus absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/80 text-white transition hover:bg-red-600"
+                aria-label="Đóng thông báo"
+            >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+                </svg>
+            </button>
+            <img
+                src="{{ asset('storage/' . ltrim($popupImage, '/')) }}"
+                alt="Thông báo"
+                class="max-h-[80vh] w-full rounded-lg object-contain"
+            >
+        </div>
+    </x-ui.modal>
+@endif
 
     <section
         x-data="{
@@ -98,7 +121,7 @@
                                 type="search"
                                 name="search"
                                 class="w-full border-0 bg-transparent p-0 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0"
-                                placeholder="Tìm: chữ ký số, hóa đơn, phần mềm, liên hệ, ..."
+                                placeholder="Tìm kiếm..."
                             >
                         </div>
                         <button
@@ -111,7 +134,7 @@
                 </form>
 
                 <div class="mt-7 flex flex-wrap justify-center gap-3">
-                    <x-ui.button :href="route('pricing')" class="!bg-amber-400 !text-slate-950 hover:!bg-amber-300">
+                    <x-ui.button :href="route('pricing')" class="!bg-red-600 !text-white hover:!bg-red-700">
                         Xem báo giá
                     </x-ui.button>
                     <x-ui.button :href="route('contact')" variant="secondary" class="!border-white/30 !bg-white/10 !text-white hover:!bg-white/15">
@@ -122,7 +145,7 @@
                 <div class="mx-auto mt-9 grid max-w-3xl gap-3 sm:grid-cols-3">
                     @foreach ($stats as $item)
                         <div class="rounded-lg border border-white/15 bg-white/10 p-4 text-left backdrop-blur">
-                            <p class="text-2xl font-bold text-amber-300">{{ $item['value'] }}</p>
+                            <p class="text-2xl font-bold text-red-300">{{ $item['value'] }}</p>
                             <p class="mt-1 text-xs font-semibold leading-5 text-zinc-200">{{ $item['label'] }}</p>
                         </div>
                     @endforeach
@@ -174,7 +197,7 @@
     <section class="site-section-warm" data-scroll-section="Quy trình hỗ trợ">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-8 max-w-4xl text-center" data-reveal="fade-up">
-                <p class="ui-section-kicker"><span>Quy trình hỗ trợ</span></p>
+                <p class="ui-section-kicker"><span>LIÊN HỆ</span></p>
                 <h2 class="mx-auto mt-5 max-w-3xl text-lg font-semibold leading-8 text-slate-700 sm:text-xl">
                     {{ $homeContent['process_intro'] }}
                 </h2>
@@ -209,16 +232,19 @@
 
                 <div class="grid gap-4 lg:gap-5" data-reveal="fade-left">
                     @foreach ($processSteps as $index => $step)
-                        <article class="flex gap-4 rounded-lg border border-slate-200/80 bg-white/95 p-5 shadow-[0_22px_62px_-46px_rgb(15_23_42/0.48)] transition duration-200 ease-out hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-[0_26px_72px_-44px_rgb(15_23_42/0.55)]" data-reveal="fade-left" data-reveal-delay="{{ 120 + ($index * 90) }}">
-                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-950 text-base font-extrabold text-white">
-                                {{ $index + 1 }}
-                            </span>
+                        <article class="flex gap-4 rounded-lg border border-slate-200/80 bg-white/95 p-5 shadow-[0_22px_62px_-46px_rgb(15_23_42/0.48)] transition duration-200 ease-out hover:-translate-y-0.5 hover:border-red-200 hover:shadow-[0_26px_72px_-44px_rgb(15_23_42/0.55)]" data-reveal="fade-left" data-reveal-delay="{{ 120 + ($index * 90) }}">
                             <div>
                                 <h3 class="text-lg font-extrabold text-slate-950 sm:text-xl">{{ $step['title'] }}</h3>
                                 <p class="mt-2 text-sm font-medium leading-6 text-slate-600 sm:text-base">{{ $step['desc'] }}</p>
                             </div>
                         </article>
                     @endforeach
+
+                    <div class="flex justify-center pt-1 sm:justify-start">
+                        <x-ui.button :href="route('contact')">
+                            Liên hệ ngay
+                        </x-ui.button>
+                    </div>
                 </div>
             </div>
         </div>

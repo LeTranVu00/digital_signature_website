@@ -11,7 +11,7 @@
         @else
             <img
                 src="{{ asset('images/digital-signature-cybersecurity-hero.png') }}"
-                alt="Digital Signature"
+                alt="CHỮ KÝ SỐ VIP"
                 class="h-44 w-full object-cover sm:h-48"
                 loading="lazy"
                 decoding="async"
@@ -22,7 +22,7 @@
     <div class="p-6">
         <div class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
             <a href="{{ route('blog.category', $post->category->slug) }}"
-               class="font-semibold text-amber-700 hover:text-amber-800">
+                    class="font-semibold text-red-600 hover:text-red-700">
                 {{ $post->category->name }}
             </a>
             <span aria-hidden="true">/</span>
@@ -31,7 +31,7 @@
 
         <h3 class="mt-3 text-xl font-extrabold leading-snug text-slate-950">
             <a href="{{ route('blog.show', $post->slug) }}"
-               class="hover:text-amber-700">
+               class="transition-colors hover:text-red-600">
                 {{ $post->title }}
             </a>
         </h3>
@@ -41,7 +41,7 @@
         </p>
 
         <a href="{{ route('blog.show', $post->slug) }}"
-           class="mt-5 inline-flex text-sm font-semibold text-amber-700 hover:text-amber-800">
+              class="mt-5 inline-flex text-sm font-semibold text-red-600 transition-colors hover:text-red-700">
             Xem thảo luận
         </a>
     </div>

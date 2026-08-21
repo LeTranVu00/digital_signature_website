@@ -43,6 +43,8 @@ class SiteSetting extends Model
                 'process_intro' => '',
                 'youtube_embed_url' => '',
                 'video_thumbnail' => '',
+                'popup_enabled' => false,
+                'popup_image' => '',
                 'process_steps' => [],
                 'stats' => [],
                 'cta_title' => '',
@@ -61,8 +63,9 @@ class SiteSetting extends Model
                 'form_copy' => '',
                 'qr_card' => [
                     'label' => '',
-                    'url' => '',
+                    'image' => '',
                 ],
+                'support_links' => [],
             ],
             'software' => [
                 'hero_title' => '',

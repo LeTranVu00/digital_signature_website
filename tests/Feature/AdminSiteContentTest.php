@@ -135,6 +135,37 @@ class AdminSiteContentTest extends TestCase
             ->assertSee('storage/'.$thumbnail, false);
     }
 
+    public function test_admin_can_upload_and_enable_home_popup(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.site-content.update', 'home'), [
+                'hero_title' => 'Trang chu',
+                'hero_copy' => 'Mo ta hero',
+                'intro_text' => 'Noi dung gioi thieu',
+                'process_intro' => 'Quy trinh ro rang',
+                'popup_enabled' => '1',
+                'popup_image' => UploadedFile::fake()->image('home-popup.png', 1200, 800),
+                'cta_title' => 'Can ho tro?',
+                'cta_copy' => 'Lien he chung toi.',
+            ])
+            ->assertRedirect(route('admin.site-content.index', ['tab' => 'home']));
+
+        $popupImage = SiteSetting::valueFor('home')['popup_image'];
+
+        $this->assertStringStartsWith('home-popup/', $popupImage);
+        Storage::disk('public')->assertExists($popupImage);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('home-announcement', false)
+            ->assertSee('storage/'.$popupImage, false)
+            ->assertSee('Thông báo');
+    }
+
     public function test_admin_can_open_software_links_as_collapsed_panels(): void
     {
         SiteSetting::query()->create([
@@ -286,16 +317,22 @@ class AdminSiteContentTest extends TestCase
         $this->assertCount(3, $items);
     }
 
-    public function test_admin_can_update_contact_zalo_qr_link(): void
+    public function test_admin_can_upload_contact_zalo_qr_image(): void
     {
+        Storage::fake('public');
+
         $admin = User::factory()->create(['role' => 'admin']);
 
         $this->actingAs($admin)
             ->get(route('admin.site-content.index', ['tab' => 'contact']))
             ->assertOk()
             ->assertSee('name="qr_card[label]"', false)
-            ->assertSee('name="qr_card[url]"', false)
-            ->assertDontSee('qr_cards[0][image]', false);
+            ->assertSee('name="qr_card[image]"', false)
+            ->assertSee('name="support_links[0][type]"', false)
+            ->assertSee('name="support_links[0][label]"', false)
+            ->assertSee('name="support_links[0][url]"', false)
+            ->assertDontSee('name="qr_card[url]"', false)
+            ->assertDontSee('data-qr-code', false);
 
         $this->actingAs($admin)
             ->patch(route('admin.site-content.update', 'contact'), [
@@ -304,22 +341,46 @@ class AdminSiteContentTest extends TestCase
                 'form_title' => 'Gui thong tin',
                 'form_copy' => 'Mo ta form',
                 'qr_card' => [
-                    'label' => 'QR Zalo tu dong',
-                    'url' => 'https://zalo.me/0900000000',
+                    'label' => 'QR Zalo ho tro',
+                    'image' => UploadedFile::fake()->image('zalo-qr.png', 500, 500),
+                ],
+                'support_links' => [
+                    [
+                        'type' => 'zalo',
+                        'label' => 'Zalo kinh doanh',
+                        'url' => 'https://zalo.me/0900000000',
+                    ],
+                    [
+                        'type' => 'zalo',
+                        'label' => 'Zalo ky thuat',
+                        'url' => 'https://zalo.me/0911111111',
+                    ],
+                    [
+                        'type' => 'phone',
+                        'label' => 'Hotline',
+                        'url' => 'tel:0900000000',
+                    ],
                 ],
             ])
             ->assertRedirect(route('admin.site-content.index', ['tab' => 'contact']));
 
         $contact = SiteSetting::valueFor('contact');
 
-        $this->assertSame('QR Zalo tu dong', $contact['qr_card']['label']);
-        $this->assertSame('https://zalo.me/0900000000', $contact['qr_card']['url']);
+        $this->assertSame('QR Zalo ho tro', $contact['qr_card']['label']);
+        $this->assertStringStartsWith('contact/', $contact['qr_card']['image']);
+        Storage::disk('public')->assertExists($contact['qr_card']['image']);
+        $this->assertCount(3, $contact['support_links']);
+        $this->assertSame('Zalo kinh doanh', $contact['support_links'][0]['label']);
+        $this->assertSame('tel:0900000000', $contact['support_links'][2]['url']);
 
         $this->get(route('contact'))
             ->assertOk()
-            ->assertSee('data-qr-code', false)
-            ->assertSee('data-qr-value="https://zalo.me/0900000000"', false)
-            ->assertSee('QR Zalo tu dong');
+            ->assertSee('storage/'.$contact['qr_card']['image'], false)
+            ->assertSee('QR Zalo ho tro')
+            ->assertSee('Danh sách Zalo hỗ trợ')
+            ->assertSee('Zalo kinh doanh')
+            ->assertSee('Zalo ky thuat')
+            ->assertSee('tel:0900000000', false);
     }
 
     public function test_frontend_software_page_shows_category_tabs(): void

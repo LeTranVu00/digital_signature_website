@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Dịch vụ - Digital Signature')
+@section('title', 'Dịch vụ - CHỮ KÝ SỐ VIP')
 
 @section('content')
     <section class="relative overflow-hidden bg-zinc-950 py-16 text-white sm:py-20 lg:py-24" data-scroll-section="Dịch vụ">

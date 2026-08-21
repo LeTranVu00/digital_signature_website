@@ -71,7 +71,7 @@
                 @endunless
                 class="truncate text-base font-bold tracking-normal"
             >
-                Digital Signature
+                CHỮ KÝ SỐ VIP
             </span>
         </a>
 

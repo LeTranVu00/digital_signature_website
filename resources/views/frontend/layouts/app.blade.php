@@ -6,7 +6,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'Digital Signature')</title>
+    <title>@yield('title', 'CHỮ KÝ SỐ VIP')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <script>
@@ -36,10 +36,10 @@
                class="inline-flex shrink-0 items-center gap-3 text-base font-bold text-slate-950 sm:text-lg">
                 <img
                     src="{{ asset('images/logo.jpg') }}"
-                    alt="Digital Signature"
+                    alt="CHỮ KÝ SỐ VIP"
                     class="h-10 w-10 rounded-full object-cover"
                 >
-                <span class="hidden sm:inline">Digital Signature</span>
+                <span class="hidden sm:inline">CHỮ KÝ SỐ VIP</span>
             </a>
 
             @php
@@ -56,7 +56,7 @@
                 @foreach ($frontendLinks as $link)
                     <a
                         href="{{ $link['url'] }}"
-                        class="{{ $link['active'] ? 'bg-red-50 text-red-600 shadow-sm ring-1 ring-red-100' : 'text-slate-600 hover:bg-amber-50 hover:text-red-600' }} rounded-full px-5 py-2 transition-all"
+                        class="{{ $link['active'] ? 'bg-red-50 text-red-600 shadow-sm ring-1 ring-red-100' : 'text-slate-600 hover:bg-red-50 hover:text-red-600' }} rounded-full px-5 py-2 transition-all"
                     >
                         {{ $link['label'] }}
                     </a>
@@ -169,15 +169,127 @@
         @yield('content')
     </main>
 
+    @unless (request()->routeIs('home', 'blog.index'))
+        <section class="site-section-cool border-t border-slate-200/80 py-10" data-scroll-section="Tìm kiếm">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <form action="{{ route('blog.index') }}" method="GET">
+                    <label for="site-search" class="sr-only">Tìm kiếm trong diễn đàn</label>
+                    <div class="flex flex-col gap-3 rounded-lg border border-white/20 bg-white p-2 shadow-[0_24px_70px_-48px_rgb(15_23_42/0.55)] sm:flex-row sm:items-center">
+                        <div class="flex min-h-12 flex-1 items-center gap-3 px-3 text-slate-500">
+                            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+                            </svg>
+                            <input
+                                id="site-search"
+                                type="search"
+                                name="search"
+                                class="w-full border-0 bg-transparent p-0 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0"
+                                placeholder="Tìm kiếm chủ đề, chữ ký số, hóa đơn..."
+                            >
+                        </div>
+                        <button
+                            type="submit"
+                            class="inline-flex min-h-12 items-center justify-center rounded-lg bg-red-600 px-6 text-sm font-bold text-white shadow-md shadow-red-950/20 transition hover:bg-red-700"
+                        >
+                            Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    @endunless
+
     @unless (trim($__env->yieldContent('hide_footer')))
         @php
-            $footerContactRows = collect(\App\Models\SiteSetting::valueFor('contact')['cards'] ?? [])
+            $contactSettings = \App\Models\SiteSetting::valueFor('contact');
+            $footerContactRows = collect($contactSettings['cards'] ?? [])
                 ->filter(fn (array $row): bool => trim((string) ($row['title'] ?? '')) !== '' || trim((string) ($row['value'] ?? '')) !== '')
                 ->take(3)
                 ->values();
+            $floatingSupportLinks = collect($contactSettings['support_links'] ?? [])
+                ->filter(fn (array $row): bool => trim((string) ($row['url'] ?? '')) !== '')
+                ->values();
+            $floatingZaloLinks = $floatingSupportLinks
+                ->where('type', 'zalo')
+                ->values();
+            $floatingPhoneLink = $floatingSupportLinks
+                ->firstWhere('type', 'phone');
         @endphp
 
         <x-ui.scroll-navigator />
+
+        @if ($floatingZaloLinks->isNotEmpty() || $floatingPhoneLink)
+            <div
+                x-data="{ zaloOpen: false }"
+                x-on:keydown.escape.window="zaloOpen = false"
+                class="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-24 sm:right-6"
+            >
+                @if ($floatingZaloLinks->isNotEmpty())
+                    <div
+                        x-show="zaloOpen"
+                        x-cloak
+                        x-transition:enter="duration-200 ease-out"
+                        x-transition:enter-start="translate-y-2 opacity-0"
+                        x-transition:enter-end="translate-y-0 opacity-100"
+                        x-transition:leave="duration-150 ease-in"
+                        x-transition:leave-start="translate-y-0 opacity-100"
+                        x-transition:leave-end="translate-y-2 opacity-0"
+                        x-on:click.outside="zaloOpen = false"
+                        class="mb-1 w-[min(calc(100vw-2rem),22rem)] overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-[0_24px_80px_-34px_rgb(15_23_42/0.65)] ring-1 ring-white/80"
+                    >
+                        <div class="border-b border-sky-100 bg-sky-50 px-4 py-3">
+                            <p class="text-sm font-extrabold text-slate-950">Danh sách Zalo hỗ trợ</p>
+                            <p class="mt-1 text-xs font-medium text-slate-500">Chọn kênh phù hợp để được tư vấn nhanh.</p>
+                        </div>
+
+                        <div class="grid gap-2 p-2.5">
+                            @foreach ($floatingZaloLinks as $index => $link)
+                                <a
+                                    href="{{ $link['url'] }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="ui-focus flex items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-sky-50"
+                                >
+                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0068ff] text-[0.65rem] font-black text-white">
+                                        Zalo
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-sm font-extrabold text-slate-950">
+                                            {{ $link['label'] ?: 'Zalo hỗ trợ ' . ($index + 1) }}
+                                        </span>
+                                        <span class="mt-0.5 block truncate text-xs font-medium text-slate-500">
+                                            {{ $link['url'] }}
+                                        </span>
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="floating-support-button ui-focus flex h-14 w-14 items-center justify-center rounded-full bg-[#0068ff] text-[0.72rem] font-black text-white shadow-xl shadow-sky-950/30 ring-2 ring-white transition hover:-translate-y-0.5"
+                        x-on:click="zaloOpen = ! zaloOpen"
+                        x-bind:aria-expanded="zaloOpen.toString()"
+                        aria-label="Mở danh sách Zalo hỗ trợ"
+                    >
+                        <span>Zalo</span>
+                    </button>
+                @endif
+
+                @if ($floatingPhoneLink)
+                    <a
+                        href="{{ $floatingPhoneLink['url'] }}"
+                        class="floating-support-button ui-focus flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl shadow-red-950/30 ring-2 ring-white transition hover:-translate-y-0.5"
+                        aria-label="{{ $floatingPhoneLink['label'] ?: 'Gọi hỗ trợ' }}"
+                    >
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M6.6 10.8c1.44 2.83 3.77 5.14 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.25 1.14.38 2.37.58 3.56.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.48c.55 0 1 .45 1 1 0 1.2.2 2.42.58 3.56.11.36.03.76-.25 1.04l-2.21 2.2Z" fill="currentColor" />
+                        </svg>
+                    </a>
+                @endif
+            </div>
+        @endif
 
     <footer class="border-t border-amber-400/20 bg-slate-950 text-white">
         <div class="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-5 lg:px-8">
@@ -185,10 +297,10 @@
                 <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
                     <img
                         src="{{ asset('images/logo.jpg') }}"
-                        alt="Digital Signature"
+                        alt="CHỮ KÝ SỐ VIP"
                         class="h-11 w-11 rounded-full object-cover ring-2 ring-white/80"
                     >
-                    <span class="text-xl font-bold text-white">Digital Signature</span>
+                    <span class="text-xl font-bold text-white">CHỮ KÝ SỐ VIP</span>
                 </a>
                 <p class="mt-4 max-w-md text-sm leading-6 text-zinc-200">
                     Cung cấp giải pháp chữ ký số, hóa đơn điện tử và hợp đồng điện tử cho cá nhân, hộ kinh doanh và doanh nghiệp.
@@ -201,11 +313,11 @@
             <div>
                 <h3 class="font-semibold text-white">Liên kết nhanh</h3>
                 <ul class="mt-4 space-y-2 text-sm text-zinc-200">
-                    <li><a href="{{ route('home') }}" class="transition hover:text-amber-300">Trang chủ</a></li>
-                    <li><a href="{{ route('pricing') }}" class="transition hover:text-amber-300">Báo giá</a></li>
-                    <li><a href="{{ route('blog.index') }}" class="transition hover:text-amber-300">Diễn đàn</a></li>
-                    <li><a href="{{ route('software') }}" class="transition hover:text-amber-300">Phần mềm hỗ trợ</a></li>
-                    <li><a href="{{ route('contact') }}" class="transition hover:text-amber-300">Liên hệ</a></li>
+                    <li><a href="{{ route('home') }}" class="transition hover:text-red-300">Trang chủ</a></li>
+                    <li><a href="{{ route('pricing') }}" class="transition hover:text-red-300">Báo giá</a></li>
+                    <li><a href="{{ route('blog.index') }}" class="transition hover:text-red-300">Diễn đàn</a></li>
+                    <li><a href="{{ route('software') }}" class="transition hover:text-red-300">Phần mềm hỗ trợ</a></li>
+                    <li><a href="{{ route('contact') }}" class="transition hover:text-red-300">Liên hệ</a></li>
                 </ul>
             </div>
 
@@ -249,7 +361,7 @@
         </div>
 
         <div class="border-t border-white/10 px-4 py-5 text-center text-sm text-zinc-300">
-            © {{ date('Y') }} Digital Signature. All rights reserved.
+            © {{ date('Y') }} CHỮ KÝ SỐ VIP. All rights reserved.
         </div>
     </footer>
     @endunless

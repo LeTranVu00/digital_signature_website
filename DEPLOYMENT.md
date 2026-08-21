@@ -1,6 +1,6 @@
 # Production Deployment Runbook
 
-Tai lieu nay dung cho deploy production Digital Signature Website. Local co the tiep tuc dung SQLite; production khuyen dung MySQL.
+Tai lieu nay dung cho deploy production CHỮ KÝ SỐ VIP Website. Local co the tiep tuc dung SQLite; production khuyen dung MySQL.
 
 ## 1. Chuan Bi Server
 

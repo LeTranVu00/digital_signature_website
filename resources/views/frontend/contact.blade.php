@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Liên hệ - Digital Signature')
+@section('title', 'Liên hệ - CHỮ KÝ SỐ VIP')
 
 @section('content')
     <section class="relative overflow-hidden bg-zinc-950 py-20 text-white sm:py-24" data-scroll-section="Liên hệ">
@@ -37,25 +37,21 @@
                     {{ $contactContent['form_copy'] }}
                 </p>
 
-                @if (! empty($qrCard['url']))
+                @if (! empty($qrCard['image']))
                     <div class="mt-7 flex justify-center">
-                        <a
-                            href="{{ $qrCard['url'] }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="group block w-full max-w-72 rounded-lg border border-amber-200/80 bg-gradient-to-br from-white via-amber-50/40 to-sky-50/70 p-5 text-center shadow-[0_26px_80px_-48px_rgb(15_23_42/0.65)] ring-1 ring-white transition duration-200 ease-out hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-[0_30px_90px_-46px_rgb(15_23_42/0.72)]"
-                        >
-                            <div
-                                class="mx-auto flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-inner shadow-slate-200/70 transition group-hover:border-amber-200"
-                                data-qr-code
-                                data-qr-value="{{ $qrCard['url'] }}"
-                                data-qr-label="{{ $qrCard['label'] }}"
-                                data-qr-size="260"
-                            ></div>
+                        <div class="block w-full max-w-72 rounded-lg border border-amber-200/80 bg-gradient-to-br from-white via-amber-50/40 to-sky-50/70 p-5 text-center shadow-[0_26px_80px_-48px_rgb(15_23_42/0.65)] ring-1 ring-white">
+                            <div class="mx-auto flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-inner shadow-slate-200/70">
+                                <img
+                                    src="{{ asset('storage/' . ltrim($qrCard['image'], '/')) }}"
+                                    alt="{{ $qrCard['label'] ?: 'Mã QR hỗ trợ' }}"
+                                    class="h-full w-full object-contain"
+                                    loading="lazy"
+                                >
+                            </div>
                             @if ($qrCard['label'] !== '')
                                 <p class="mt-4 text-sm font-extrabold leading-5 text-slate-950">{{ $qrCard['label'] }}</p>
                             @endif
-                        </a>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -107,7 +103,7 @@
                 </div>
 
                 <div class="flex justify-end md:col-span-2">
-                    <x-ui.button type="submit">
+                    <x-ui.button type="submit" class="!bg-red-600 !text-white hover:!bg-red-700">
                         Gửi yêu cầu tư vấn
                     </x-ui.button>
                 </div>

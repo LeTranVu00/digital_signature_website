@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', $post->title . ' - Digital Signature')
+@section('title', $post->title . ' - CHỮ KÝ SỐ VIP')
 
 @section('content')
     <article class="bg-white">

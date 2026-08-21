@@ -1349,6 +1349,46 @@
                 </div>
             </x-ui.card>
 
+            <x-ui.card title="Popup thông báo trang chủ" description="Popup sẽ tự mở khi khách truy cập trang chủ nếu được bật và đã có ảnh.">
+                <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                    <div class="grid content-start gap-3">
+                        <label class="inline-flex items-center gap-3 text-sm font-bold text-slate-700">
+                            <input
+                                type="checkbox"
+                                name="popup_enabled"
+                                value="1"
+                                @checked($activeSettings['popup_enabled'] ?? false)
+                                class="h-5 w-5 rounded border-slate-300 text-red-600 focus:ring-red-500"
+                            >
+                            Bật popup khi khách vào trang chủ
+                        </label>
+                        <div data-file-upload>
+                            <label class="ui-label" for="popup-image">Ảnh popup</label>
+                            <input
+                                id="popup-image"
+                                type="file"
+                                name="popup_image"
+                                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                                class="ui-control h-14 p-0 leading-[3.5rem] text-slate-600 file:mr-4 file:h-14 file:border-0 file:bg-red-600 file:px-4 file:py-0 file:text-sm file:font-semibold file:leading-[3.5rem] file:text-white hover:file:bg-red-700"
+                                x-on:change="handleFileChoice($event, 'Ảnh popup mới sẽ được lưu khi bấm Lưu nội dung.')"
+                            >
+                            <p class="ui-helper">JPG, PNG hoặc WEBP, tối đa 10 MB. Để trống nếu muốn giữ ảnh hiện tại.</p>
+                            <div class="mt-1" data-upload-preview></div>
+                        </div>
+                    </div>
+
+                    @if (! empty($activeSettings['popup_image']))
+                        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white p-2">
+                            <img
+                                src="{{ asset('storage/' . ltrim((string) $activeSettings['popup_image'], '/')) }}"
+                                alt="Ảnh popup trang chủ hiện tại"
+                                class="max-h-48 w-full rounded object-contain"
+                            >
+                        </div>
+                    @endif
+                </div>
+            </x-ui.card>
+
             <x-ui.card title="Ô giới thiệu" description="Có thể thêm, sửa hoặc xóa tùy số lượng cần hiển thị ngoài trang.">
                 <x-slot:actions>
                     <button
@@ -2172,13 +2212,57 @@
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input name="qr_card[label]" label="Nhãn QR" :value="$contactQrCard['label'] ?? ''" />
                         <x-ui.input
-                            name="qr_card[url]"
-                            type="url"
-                            label="Link Zalo để tạo QR"
-                            :value="$contactQrCard['url'] ?? ''"
-                            helper="Ví dụ: https://zalo.me/0900000000"
+                            name="qr_card[image]"
+                            type="file"
+                            label="Ảnh QR có sẵn"
+                            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                            helper="Tải lên ảnh QR Zalo có sẵn, tối đa 8 MB."
                         />
                     </div>
+                    @if (! empty($contactQrCard['image']))
+                        <div class="mt-4 flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-3">
+                            <img
+                                src="{{ asset('storage/' . ltrim($contactQrCard['image'], '/')) }}"
+                                alt="QR Zalo hiện tại"
+                                class="h-24 w-24 rounded-lg border border-slate-200 object-contain"
+                            >
+                            <p class="text-sm font-medium text-slate-600">Ảnh QR hiện tại sẽ được thay thế khi bạn tải ảnh mới.</p>
+                        </div>
+                    @endif
+                </div>
+            </x-ui.card>
+
+            <x-ui.card
+                title="Nút Zalo và điện thoại nổi"
+                description="Các link Zalo sẽ hiện thành danh sách khi khách bấm nút Zalo. Link điện thoại đầu tiên sẽ dùng cho nút gọi nhanh."
+            >
+                <div class="grid gap-4 lg:grid-cols-2">
+                    @foreach ($padRows($activeSettings['support_links'] ?? [], 8, ['type' => 'zalo', 'label' => '', 'url' => '']) as $index => $row)
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <p class="mb-3 text-sm font-bold text-slate-500">Kênh hỗ trợ {{ $index + 1 }}</p>
+
+                            <div class="grid gap-3">
+                                <x-ui.select name="support_links[{{ $index }}][type]" label="Loại">
+                                    <option value="zalo" @selected(($row['type'] ?? 'zalo') === 'zalo')>Zalo</option>
+                                    <option value="phone" @selected(($row['type'] ?? 'zalo') === 'phone')>Điện thoại</option>
+                                </x-ui.select>
+
+                                <x-ui.input
+                                    name="support_links[{{ $index }}][label]"
+                                    label="Tên hiển thị"
+                                    :value="$row['label'] ?? ''"
+                                    helper="Ví dụ: Hỗ trợ doanh nghiệp, Kỹ thuật, Hotline."
+                                />
+
+                                <x-ui.input
+                                    name="support_links[{{ $index }}][url]"
+                                    label="Link khách nhấn"
+                                    :value="$row['url'] ?? ''"
+                                    helper="Zalo: https://zalo.me/0900000000. Điện thoại: tel:0900000000."
+                                />
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </x-ui.card>
 

@@ -1,6 +1,6 @@
 @extends('frontend.layouts.app')
 
-@section('title', 'Giới thiệu - Digital Signature')
+@section('title', 'Giới thiệu - CHỮ KÝ SỐ VIP')
 
 @section('content')
     @php
