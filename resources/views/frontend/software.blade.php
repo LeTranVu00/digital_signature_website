@@ -12,13 +12,6 @@
             <p class="site-page-copy">
                 {{ $softwareContent['hero_copy'] }}
             </p>
-            <form action="{{ route('blog.index') }}" method="GET" class="mx-auto mt-8 max-w-3xl">
-                <label for="software-search" class="sr-only">Tìm kiếm phần mềm hỗ trợ</label>
-                <div class="flex flex-col gap-3 rounded-lg border border-white/20 bg-white p-2 shadow-2xl shadow-slate-950/30 sm:flex-row sm:items-center">
-                    <input id="software-search" type="search" name="search" value="{{ request('search') }}" class="min-h-12 flex-1 rounded-lg border-0 px-4 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0" placeholder="Tìm kiếm phần mềm, công cụ hỗ trợ...">
-                    <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-lg bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700">Tìm kiếm</button>
-                </div>
-            </form>
         </div>
     </section>
 
