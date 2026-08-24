@@ -9,38 +9,34 @@
             <h1 class="site-page-title">
                 {{ $pricingContent['hero_title'] }}
             </h1>
-            <p class="site-page-copy">
-                {{ $pricingContent['hero_copy'] }}
-            </p>
-        </div>
-    </section>
 
-    <section class="border-b border-slate-200 bg-white py-6" data-scroll-section="Tìm kiếm báo giá">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <form action="{{ route('blog.index') }}" method="GET">
+            <form action="{{ route('blog.index') }}" method="GET" class="mx-auto mt-8 max-w-3xl">
                 <label for="pricing-search" class="sr-only">Tìm kiếm nội dung báo giá</label>
-                <div class="flex flex-col gap-3 rounded-2xl border border-slate-300 bg-slate-50 p-2 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.6)] sm:flex-row sm:items-center">
-                    <div class="flex min-h-12 flex-1 items-center gap-3 px-3 text-slate-500">
-                        <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+                <div class="flex flex-col gap-3 rounded-lg border border-white/20 bg-white p-2 shadow-2xl shadow-slate-950/30 sm:flex-row sm:items-center">
+                    <div class="flex min-h-12 flex-1 items-center gap-3 px-3">
+                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15Z" />
                         </svg>
                         <input
                             id="pricing-search"
                             type="search"
                             name="search"
                             value="{{ request('search') }}"
-                            class="w-full border-0 bg-transparent p-0 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0"
+                            class="w-full border-0 p-0 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0"
                             placeholder="Tìm kiếm báo giá, gói dịch vụ..."
                         >
                     </div>
                     <button
                         type="submit"
-                        class="inline-flex min-h-12 items-center justify-center rounded-xl bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700"
+                        class="inline-flex min-h-12 items-center justify-center rounded-lg bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700"
                     >
                         Tìm kiếm
                     </button>
                 </div>
             </form>
+            <p class="site-page-copy">
+                {{ $pricingContent['hero_copy'] }}
+            </p>
         </div>
     </section>
 
