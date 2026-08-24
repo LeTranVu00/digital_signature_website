@@ -9,21 +9,16 @@
             <h1 class="site-page-title">
                 {{ $softwareContent['hero_title'] }}
             </h1>
-            <form action="{{ route('blog.index') }}" method="GET" class="mx-auto mt-8 max-w-3xl">
-                <label for="software-search" class="sr-only">Tìm kiếm phần mềm hỗ trợ</label>
-                <div class="flex flex-col gap-3 rounded-lg border border-white/20 bg-white p-2 shadow-2xl shadow-slate-950/30 sm:flex-row sm:items-center">
-                    <div class="flex min-h-12 flex-1 items-center gap-3 px-3">
-                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0 15Z" />
-                        </svg>
-                        <input id="software-search" type="search" name="search" value="{{ request('search') }}" class="w-full border-0 p-0 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0" placeholder="Tìm kiếm phần mềm, công cụ hỗ trợ...">
-                    </div>
-                    <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-lg bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700">Tìm kiếm</button>
-                </div>
-            </form>
             <p class="site-page-copy">
                 {{ $softwareContent['hero_copy'] }}
             </p>
+            <form action="{{ route('blog.index') }}" method="GET" class="mx-auto mt-8 max-w-3xl">
+                <label for="software-search" class="sr-only">Tìm kiếm phần mềm hỗ trợ</label>
+                <div class="flex flex-col gap-3 rounded-lg border border-white/20 bg-white p-2 shadow-2xl shadow-slate-950/30 sm:flex-row sm:items-center">
+                    <input id="software-search" type="search" name="search" value="{{ request('search') }}" class="min-h-12 flex-1 rounded-lg border-0 px-4 text-base font-semibold text-slate-900 placeholder:text-slate-400 focus:ring-0" placeholder="Tìm kiếm phần mềm, công cụ hỗ trợ...">
+                    <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-lg bg-red-600 px-6 text-sm font-bold text-white transition hover:bg-red-700">Tìm kiếm</button>
+                </div>
+            </form>
         </div>
     </section>
 
