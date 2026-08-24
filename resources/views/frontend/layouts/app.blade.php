@@ -170,7 +170,7 @@
     </header>
     @endunless
 
-    @unless (request()->routeIs('home', 'blog.index'))
+    @unless (request()->routeIs('home', 'blog.index', 'pricing', 'software', 'contact'))
         <section class="border-b border-slate-300 bg-white py-6 pt-28" data-scroll-section="Tìm kiếm">
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <form action="{{ route('blog.index') }}" method="GET">
