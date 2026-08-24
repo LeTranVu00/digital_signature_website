@@ -172,6 +172,7 @@ class PageController extends Controller
 
         $qrCard = [
             'label' => trim((string) ($qrCard['label'] ?? '')),
+            'image' => trim((string) ($qrCard['image'] ?? '')),
             'url' => trim((string) ($qrCard['url'] ?? '')),
         ];
 

@@ -90,7 +90,8 @@ class SiteSetting extends Model
 
             $stored['qr_card'] = [
                 'label' => $legacyZaloCard['label'] ?? '',
-                'url' => '',
+                'image' => $legacyZaloCard['image'] ?? '',
+                'url' => $legacyZaloCard['url'] ?? '',
             ];
         }
 
