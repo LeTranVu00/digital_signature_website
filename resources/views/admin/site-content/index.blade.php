@@ -2375,10 +2375,11 @@
                                 />
 
                                 <x-ui.input
-                                    name="support_links[{{ $index }}][url]"
-                                    label="Link khách nhấn"
-                                    :value="$row['url'] ?? ''"
-                                    helper="Zalo: https://zalo.me/0900000000. Điện thoại: tel:0900000000."
+                                    name="support_links[{{ $index }}][phone]"
+                                    label="Số điện thoại"
+                                    :value="preg_replace('/^(?:https:\/\/zalo\.me\/|tel:)/i', '', (string) ($row['url'] ?? ''))"
+                                    inputmode="tel"
+                                    helper="Chỉ cần nhập số điện thoại. Hệ thống tự tạo link Zalo hoặc nút gọi theo Loại."
                                 />
                             </div>
                         </details>
@@ -2390,7 +2391,7 @@
                 <template data-blank-home-repeater-template="support_links">
                     <details class="group overflow-hidden rounded-xl border border-red-200 bg-red-50/30 shadow-sm" data-home-repeater-item="support_links" data-home-index="__INDEX__" open>
                         <summary class="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-3 [&::-webkit-details-marker]:hidden"><div class="min-w-0"><p class="text-sm font-bold text-slate-500">Kênh hỗ trợ __NUMBER__</p><h3 class="truncate text-lg font-extrabold text-slate-400">Chưa đặt tên kênh</h3></div><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25-4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg></span></summary>
-                        <div class="grid gap-3 border-t border-slate-200 p-4"><input type="hidden" name="support_links[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input><div class="flex justify-end"><button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg> Xóa kênh này</button></div><p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Kênh này đang được chọn xóa khi lưu.</p><x-ui.select name="support_links[__INDEX__][type]" label="Loại"><option value="zalo">Zalo</option><option value="phone">Điện thoại</option></x-ui.select><x-ui.input name="support_links[__INDEX__][label]" label="Tên hiển thị" helper="Ví dụ: Hỗ trợ doanh nghiệp, Kỹ thuật, Hotline." /><x-ui.input name="support_links[__INDEX__][url]" label="Link khách nhấn" helper="Zalo: https://zalo.me/0900000000. Điện thoại: tel:0900000000." /></div>
+                        <div class="grid gap-3 border-t border-slate-200 p-4"><input type="hidden" name="support_links[__INDEX__][delete]" value="1" disabled data-home-repeater-delete-input><div class="flex justify-end"><button type="button" class="ui-focus inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600" data-toggle-home-repeater-delete aria-pressed="false"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg> Xóa kênh này</button></div><p class="hidden text-sm font-semibold text-red-600" data-home-repeater-delete-message>Kênh này đang được chọn xóa khi lưu.</p><x-ui.select name="support_links[__INDEX__][type]" label="Loại"><option value="zalo">Zalo</option><option value="phone">Điện thoại</option></x-ui.select><x-ui.input name="support_links[__INDEX__][label]" label="Tên hiển thị" helper="Ví dụ: Hỗ trợ doanh nghiệp, Kỹ thuật, Hotline." /><x-ui.input name="support_links[__INDEX__][phone]" label="Số điện thoại" inputmode="tel" helper="Chỉ cần nhập số điện thoại. Hệ thống tự tạo link Zalo hoặc nút gọi theo Loại." /></div>
                     </details>
                 </template>
             </x-ui.card>

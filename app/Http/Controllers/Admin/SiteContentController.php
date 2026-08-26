@@ -333,7 +333,7 @@ class SiteContentController extends Controller
             'support_links.*.delete' => ['nullable'],
             'support_links.*.type' => ['nullable', 'string', 'in:zalo,phone'],
             'support_links.*.label' => ['nullable', 'string', 'max:160'],
-            'support_links.*.url' => ['nullable', 'string', 'max:500', $this->supportUrlRule()],
+            'support_links.*.phone' => ['nullable', 'string', 'max:30'],
         ]);
 
         $stored = SiteSetting::valueFor('contact');
@@ -457,11 +457,20 @@ class SiteContentController extends Controller
             ->reject(fn (array $row): bool => filter_var($row['delete'] ?? false, FILTER_VALIDATE_BOOL))
             ->map(function (array $row): array {
                 $type = (string) ($row['type'] ?? 'zalo');
+                $phone = trim((string) ($row['phone'] ?? ''));
+
+                if ($phone === '') {
+                    $legacyUrl = trim((string) ($row['url'] ?? ''));
+                    $phone = preg_replace('/^https?:\/\/zalo\.me\//i', '', $legacyUrl) ?: $legacyUrl;
+                    $phone = preg_replace('/^tel:/i', '', $phone) ?: $phone;
+                }
+
+                $phone = preg_replace('/[^0-9+]/', '', $phone) ?: '';
 
                 return [
                     'type' => in_array($type, ['zalo', 'phone'], true) ? $type : 'zalo',
                     'label' => trim((string) ($row['label'] ?? '')),
-                    'url' => trim((string) ($row['url'] ?? '')),
+                    'url' => $phone === '' ? '' : ($type === 'phone' ? 'tel:' . $phone : 'https://zalo.me/' . ltrim($phone, '+')),
                 ];
             })
             ->filter(fn (array $row): bool => $row['url'] !== '')

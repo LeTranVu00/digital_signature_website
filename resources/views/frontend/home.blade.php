@@ -7,11 +7,14 @@
     $youtubeEmbedUrl = $homeContent['youtube_embed_url'] ?? '';
     $videoThumbnail = $homeContent['video_thumbnail'] ?? '';
     $popupImage = $homeContent['popup_image'] ?? '';
+    $contactSettings = \App\Models\SiteSetting::valueFor('contact');
+    $popupPhoneLink = collect($contactSettings['support_links'] ?? [])
+        ->firstWhere('type', 'phone');
 @endphp
 
 @if (($homeContent['popup_enabled'] ?? false) && $popupImage)
-    <x-ui.modal name="home-announcement" :show="true" maxWidth="2xl" title="Thông báo">
-        <div class="relative bg-white p-3 sm:p-5">
+    <x-ui.modal name="home-announcement" :show="true" session-key="home-announcement-closed" maxWidth="2xl" panel-class="!rounded-none !bg-transparent !shadow-none !ring-0">
+        <div class="relative bg-transparent p-0">
             <button
                 type="button"
                 x-on:click="close()"
@@ -22,11 +25,25 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
                 </svg>
             </button>
-            <img
-                src="{{ asset('storage/' . ltrim($popupImage, '/')) }}"
-                alt="Thông báo"
-                class="max-h-[80vh] w-full rounded-lg object-contain"
-            >
+            @if (! empty($popupPhoneLink['url']))
+                <a
+                    href="{{ $popupPhoneLink['url'] }}"
+                    aria-label="{{ $popupPhoneLink['label'] ?: 'Gọi hotline' }}"
+                    title="{{ $popupPhoneLink['label'] ?: 'Gọi hotline' }}"
+                >
+                    <img
+                        src="{{ asset('storage/' . ltrim($popupImage, '/')) }}"
+                        alt="Thông báo - bấm để gọi hotline"
+                        class="max-h-[80vh] w-full rounded-lg object-contain transition hover:opacity-95"
+                    >
+                </a>
+            @else
+                <img
+                    src="{{ asset('storage/' . ltrim($popupImage, '/')) }}"
+                    alt="Thông báo"
+                    class="max-h-[80vh] w-full rounded-lg object-contain"
+                >
+            @endif
         </div>
     </x-ui.modal>
 @endif

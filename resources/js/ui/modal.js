@@ -1,10 +1,15 @@
 export function registerModal(Alpine) {
-    Alpine.data('uiModal', ({ name, show = false }) => ({
+    Alpine.data('uiModal', ({ name, show = false, sessionKey = null }) => ({
         name,
         show,
+        sessionKey,
         previousActiveElement: null,
 
         init() {
+            if (this.sessionKey && window.sessionStorage.getItem(this.sessionKey) === 'closed') {
+                this.show = false;
+            }
+
             if (this.show) {
                 this.open();
             }
@@ -36,6 +41,9 @@ export function registerModal(Alpine) {
 
         close() {
             this.show = false;
+            if (this.sessionKey) {
+                window.sessionStorage.setItem(this.sessionKey, 'closed');
+            }
             document.body.classList.remove('overflow-hidden');
             this.$nextTick(() => {
                 if (this.previousActiveElement && typeof this.previousActiveElement.focus === 'function') {

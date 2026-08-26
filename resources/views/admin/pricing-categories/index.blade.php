@@ -20,39 +20,49 @@
         </div>
     @endif
 
-    <x-ui.table table-class="w-full table-fixed">
+    <x-ui.table table-class="w-full">
         <x-slot name="head">
             <tr>
-                <th class="w-40">Ảnh bảng giá</th>
+                <th class="w-32">Ảnh bảng giá</th>
                 <th>Tên danh mục</th>
-                <th class="w-20">Thứ tự</th>
-                <th class="w-32">Trạng thái</th>
-                <th class="w-44 text-right">Thao tác</th>
+                <th class="w-36 text-center">Trạng thái</th>
+                <th class="w-36 text-center">Thao tác</th>
             </tr>
         </x-slot>
 
         @forelse ($pricingCategories as $category)
             <tr>
-                <td class="w-40">
-                    <img
-                        src="{{ $category->imageUrl() }}"
-                        alt="{{ $category->name }}"
-                        class="h-20 w-32 rounded-lg border border-slate-200 object-cover"
-                        loading="lazy"
-                    >
+                <td class="w-32 py-4">
+                    @php
+                        $imageUrl = $category->imageUrl();
+                    @endphp
+                    @if ($imageUrl)
+                        <img
+                            src="{{ $imageUrl }}"
+                            alt="{{ $category->name }}"
+                            class="h-20 w-28 rounded-lg border border-slate-200 object-cover"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    @else
+                        <div class="flex h-20 w-28 items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50">
+                            <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    @endif
                 </td>
-                <td class="break-words">
+                <td class="py-4">
                     <p class="font-semibold text-slate-950">{{ $category->name }}</p>
-                    <p class="mt-1 break-words text-sm text-slate-500">{{ $category->description ?: 'Chưa có mô tả' }}</p>
-                    <p class="mt-2 break-all text-xs font-medium text-slate-400">{{ $category->slug }}</p>
+                    <p class="mt-1 break-words whitespace-pre-line text-sm text-slate-500">{{ $category->description ?: 'Chưa có mô tả' }}</p>
+                    <p class="mt-1 text-xs font-medium text-slate-400">{{ $category->slug }}</p>
                 </td>
-                <td>{{ $category->sort_order }}</td>
-                <td>
+                <td class="w-36 py-4 text-center">
                     <x-ui.badge :variant="$category->is_active ? 'published' : 'draft'">
                         {{ $category->is_active ? 'Đang hiển thị' : 'Đang ẩn' }}
                     </x-ui.badge>
                 </td>
-                <td class="whitespace-nowrap">
+                <td class="w-36 py-4">
                     <div class="ui-table-actions">
                         <x-ui.button
                             :href="route('admin.pricing-categories.edit', $category)"
@@ -76,7 +86,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="5">
+                <td colspan="4">
                     <x-ui.empty-state description="Chưa có danh mục báo giá nào." />
                 </td>
             </tr>

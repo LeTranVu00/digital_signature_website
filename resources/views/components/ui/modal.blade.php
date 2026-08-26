@@ -4,6 +4,8 @@
     'maxWidth' => 'lg',
     'title' => null,
     'description' => null,
+    'panelClass' => '',
+    'sessionKey' => null,
 ])
 
 @php
@@ -20,7 +22,7 @@
 @endphp
 
 <div
-    x-data="uiModal({ name: @js($name), show: @js($show) })"
+    x-data="uiModal({ name: @js($name), show: @js($show), sessionKey: @js($sessionKey) })"
     x-on:open-ui-modal.window="openFromEvent($event)"
     x-on:close-ui-modal.window="closeFromEvent($event)"
     x-on:keydown.escape.window="show ? close() : null"
@@ -54,7 +56,7 @@
         x-transition:leave="duration-150 ease-in"
         x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
         x-transition:leave-end="translate-y-3 opacity-0 sm:scale-95"
-        class="relative mx-auto mb-6 mt-10 w-full {{ $maxWidthClass }} overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-slate-900/10 dark:bg-slate-900 dark:ring-white/10"
+        class="relative mx-auto mb-6 mt-10 w-full {{ $maxWidthClass }} overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-slate-900/10 dark:bg-slate-900 dark:ring-white/10 {{ $panelClass }}"
     >
         @if ($title || $description)
             <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">

@@ -61,7 +61,7 @@
         </div>
     </form>
 
-    <x-ui.table>
+    <x-ui.table table-class="w-full">
         <x-slot name="head">
             <tr>
                 <th>Nội dung</th>

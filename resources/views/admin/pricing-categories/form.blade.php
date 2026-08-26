@@ -18,7 +18,8 @@
         action="{{ $action }}"
         method="POST"
         enctype="multipart/form-data"
-        x-data="{ imagePreview: null }"
+        x-data="{ imagePreview: null, submitting: false }"
+        x-on:submit="submitting = true"
     >
         @csrf
 
@@ -33,9 +34,7 @@
                     label="Tên danh mục"
                     :value="old('name', $pricingCategory?->name)"
                     maxlength="160"
-                    required
                     autofocus
-                    placeholder="Ví dụ: Chữ ký số doanh nghiệp"
                 />
 
                 <x-ui.textarea
@@ -76,7 +75,6 @@
                     name="image"
                     label="Ảnh bảng giá"
                     accept=".jpg,.jpeg,.png,.webp"
-                    :required="! $isEdit"
                     helper="JPG, JPEG, PNG hoặc WEBP. Tối đa 8 MB. Ảnh nên rõ chữ giá tiền."
                     x-on:change="imagePreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
                 />

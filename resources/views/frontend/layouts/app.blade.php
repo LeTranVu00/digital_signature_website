@@ -2,7 +2,7 @@
 <html lang="vi">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
@@ -217,16 +217,17 @@
             $floatingZaloLinks = $floatingSupportLinks
                 ->where('type', 'zalo')
                 ->values();
-            $floatingPhoneLink = $floatingSupportLinks
-                ->firstWhere('type', 'phone');
+            $floatingPhoneLinks = $floatingSupportLinks
+                ->where('type', 'phone')
+                ->values();
         @endphp
 
         <x-ui.scroll-navigator />
 
-        @if ($floatingZaloLinks->isNotEmpty() || $floatingPhoneLink)
+        @if ($floatingZaloLinks->isNotEmpty() || $floatingPhoneLinks->isNotEmpty())
             <div
-                x-data="{ zaloOpen: false }"
-                x-on:keydown.escape.window="zaloOpen = false"
+            x-data="{ zaloOpen: false, phoneOpen: false }"
+            x-on:keydown.escape.window="zaloOpen = false; phoneOpen = false"
                 class="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-24 sm:right-6"
             >
                 @if ($floatingZaloLinks->isNotEmpty())
@@ -282,7 +283,61 @@
                     </button>
                 @endif
 
-                @if ($floatingPhoneLink)
+                @if ($floatingPhoneLinks->count() > 1)
+                    <div
+                        x-show="phoneOpen"
+                        x-cloak
+                        x-transition:enter="duration-200 ease-out"
+                        x-transition:enter-start="translate-y-2 opacity-0"
+                        x-transition:enter-end="translate-y-0 opacity-100"
+                        x-transition:leave="duration-150 ease-in"
+                        x-transition:leave-start="translate-y-0 opacity-100"
+                        x-transition:leave-end="translate-y-2 opacity-0"
+                        x-on:click.outside="phoneOpen = false"
+                        class="mb-1 w-[min(calc(100vw-2rem),22rem)] overflow-hidden rounded-2xl border border-red-100 bg-white shadow-[0_24px_80px_-34px_rgb(127_29_29/0.55)] ring-1 ring-white/80"
+                    >
+                        <div class="border-b border-red-100 bg-red-50 px-4 py-3">
+                            <p class="text-sm font-extrabold text-slate-950">Danh sách số điện thoại</p>
+                            <p class="mt-1 text-xs font-medium text-slate-500">Chọn số để gọi hỗ trợ.</p>
+                        </div>
+
+                        <div class="grid gap-2 p-2.5">
+                            @foreach ($floatingPhoneLinks as $index => $link)
+                                <a
+                                    href="{{ $link['url'] }}"
+                                    class="ui-focus flex items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-red-50"
+                                >
+                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-600 text-white">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M6.6 10.8c1.44 2.83 3.77 5.14 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.25 1.14.38 2.37.58 3.56.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.48c.55 0 1 .45 1 1 0 1.2.2 2.42.58 3.56.11.36.03.76-.25 1.04l-2.21 2.2Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-sm font-extrabold text-slate-950">
+                                            {{ $link['label'] ?: 'Điện thoại hỗ trợ ' . ($index + 1) }}
+                                        </span>
+                                        <span class="mt-0.5 block truncate text-xs font-medium text-slate-500">
+                                            {{ preg_replace('/^tel:/i', '', $link['url']) }}
+                                        </span>
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="floating-support-button floating-support-phone ui-focus flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl shadow-red-950/30 ring-2 ring-white transition hover:-translate-y-0.5"
+                        x-on:click="phoneOpen = ! phoneOpen"
+                        x-bind:aria-expanded="phoneOpen.toString()"
+                        aria-label="Mở danh sách số điện thoại"
+                    >
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M6.6 10.8c1.44 2.83 3.77 5.14 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.25 1.14.38 2.37.58 3.56.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.48c.55 0 1 .45 1 1 0 1.2.2 2.42.58 3.56.11.36.03.76-.25 1.04l-2.21 2.2Z" fill="currentColor" />
+                        </svg>
+                    </button>
+                @elseif ($floatingPhoneLinks->isNotEmpty())
+                    @php($floatingPhoneLink = $floatingPhoneLinks->first())
                     <a
                         href="{{ $floatingPhoneLink['url'] }}"
                         class="floating-support-button floating-support-phone ui-focus flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl shadow-red-950/30 ring-2 ring-white transition hover:-translate-y-0.5"
