@@ -12,6 +12,8 @@
     <title>@yield('title')</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet">
 
     <script>
         (() => {
@@ -35,7 +37,7 @@
 <body
     x-data="adminShell()"
     x-on:keydown.escape.window="closeSidebar()"
-    class="bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100"
+    class="font-sans bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100"
 >
 
 <x-ui.toast-container />

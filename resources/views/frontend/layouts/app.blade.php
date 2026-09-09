@@ -10,6 +10,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet">
 
     <script>
         if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -20,7 +22,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="overflow-x-hidden bg-white text-gray-900 antialiased">
+<body class="font-sans overflow-x-hidden bg-white text-gray-900 antialiased">
     <x-ui.toast-container />
 
     @unless (trim($__env->yieldContent('hide_header')))

@@ -31,7 +31,7 @@ class UpdateCommentRequest extends FormRequest
                 'max:2000',
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     if (is_string($value) && $value !== strip_tags($value)) {
-                        $fail('Noi dung binh luan khong duoc chua HTML.');
+                        $fail('Nội dung bình luận không được chứa HTML.');
                     }
                 },
             ],

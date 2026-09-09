@@ -33,7 +33,7 @@ class StoreCommentRequest extends FormRequest
                 'max:2000',
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     if (is_string($value) && $value !== strip_tags($value)) {
-                        $fail('Noi dung binh luan khong duoc chua HTML.');
+                        $fail('Nội dung bình luận không được chứa HTML.');
                     }
                 },
             ],
@@ -58,7 +58,7 @@ class StoreCommentRequest extends FormRequest
                     ->first();
 
                 if (! $parent) {
-                    $validator->errors()->add('parent_id', 'Binh luan tra loi khong hop le.');
+                    $validator->errors()->add('parent_id', 'Bình luận trả lời không hợp lệ.');
 
                     return;
                 }

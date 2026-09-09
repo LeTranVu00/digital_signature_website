@@ -68,6 +68,7 @@ export const initTinyMceEditors = () => {
             });
         },
     });
-
+            '@import url("https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap");',
+            'body { font-family: Figtree, ui-sans-serif, system-ui, sans-serif; font-size: 16px; line-height: 1.7; color: #111827; }',
     syncEditorsBeforeSubmit();
 };
