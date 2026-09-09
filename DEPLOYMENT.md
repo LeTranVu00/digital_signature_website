@@ -189,7 +189,11 @@ Voi upload anh, production `.env` nen de:
 FILESYSTEM_PUBLIC_ROOT=public/storage
 ```
 
-Va tao thu muc `public/storage` tren hosting neu chua co. Cau hinh nay giup upload ghi truc tiep vao public storage, khong can `php artisan storage:link`.
+ Va tao thu muc `public/storage` tren hosting neu chua co. Cau hinh nay giup upload ghi truc tiep vao public storage, khong can `php artisan storage:link`.
+
+Render web service dung filesystem tam thoi neu khong gan Persistent Disk. File `render.yaml` da cau hinh Persistent Disk 1 GB tai `/var/www/html/public/storage` va `FILESYSTEM_PUBLIC_ROOT=public/storage`; cau hinh nay ap dung cho tat ca upload: thumbnail bai viet, anh bao gia, QR lien he, banner trang chu va popup.
+
+Persistent Disk cua Render can goi `starter` tro len. Neu khong muon dung disk, co the thay the bang S3/Cloudinary va cau hinh disk `s3` tuong ung. Sau khi tao disk hoac doi sang object storage, can upload lai cac file da mat vi filesystem cu khong the khoi phuc.
 
 Neu domain dang tro vao `htdocs` thay vi `htdocs/public`, root `.htaccess` trong repo se rewrite request vao `public/` va chan truy cap cac thu muc Laravel nhay cam.
 

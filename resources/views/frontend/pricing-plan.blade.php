@@ -59,6 +59,7 @@
                                     class="max-h-[64rem] w-full object-contain"
                                     loading="lazy"
                                     decoding="async"
+                                    onerror="this.remove()"
                                 >
                             </a>
                         </article>

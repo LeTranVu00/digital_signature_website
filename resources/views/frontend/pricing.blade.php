@@ -70,6 +70,7 @@
                                 class="max-h-[72rem] w-full object-contain"
                                 loading="lazy"
                                 decoding="async"
+                                x-on:error="$el.remove()"
                             >
                         </div>
                     </div>

@@ -35,6 +35,7 @@
                         class="mb-8 max-h-[320px] w-full rounded-lg object-cover sm:mb-10 sm:max-h-[460px]"
                         loading="lazy"
                         decoding="async"
+                        onerror="this.remove()"
                     >
                 @endif
 

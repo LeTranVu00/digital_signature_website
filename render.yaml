@@ -3,6 +3,11 @@ services:
     name: digital-signature
     runtime: docker
     dockerfilePath: ./Dockerfile
+    plan: starter
+    disk:
+      name: digital-signature-storage
+      mountPath: /var/www/html/public/storage
+      sizeGB: 1
     envVars:
       - key: APP_ENV
         value: production
@@ -10,4 +15,6 @@ services:
         value: false
       - key: APP_KEY
         generateValue: false
+      - key: FILESYSTEM_PUBLIC_ROOT
+        value: public/storage
     autoDeploy: true

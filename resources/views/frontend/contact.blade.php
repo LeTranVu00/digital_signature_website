@@ -46,6 +46,7 @@
                                     alt="{{ $qrCard['label'] ?: 'Mã QR hỗ trợ' }}"
                                     class="h-full w-full object-contain"
                                     loading="lazy"
+                                    onerror="this.remove()"
                                 >
                             </div>
                             @if ($qrCard['label'] !== '')
